@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Confluence on fedaeho</title>
+    <link>https://fedaeho.github.io/tags/confluence/</link>
+    <description>Recent content in Confluence on fedaeho</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ko-KR</language>
+    <lastBuildDate>Sun, 15 Sep 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://fedaeho.github.io/tags/confluence/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Jira, Confluence 에 HTTPS 달기 - Apache Proxy 구성</title>
+      <link>https://fedaeho.github.io/posts/2019-09-15-atlassian-proxy/</link>
+      <pubDate>Sun, 15 Sep 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/posts/2019-09-15-atlassian-proxy/</guid>
+      <description>팀에서 운영하고 있는 Jira, Confluence 가 외부 접속이 가능함에도 불구하고 HTTPS 인증서가 설치되어 있지 않았다. 이외에도 보안상 취약점이 여럿 발견되었기에, Apache Proxy 설정 을 참고하여 설정하였다.
+VirtualHost 구성하기 팀에서 운영하는 Jira/Confluence 는 Atlassian 설정 파일을 외부 접근 가능한 주소로 바꾸고 DNS 업체에 해당 주소에 맞게 도메인만 물리고 포트 번호를 숨기지 않았다. 따라서, 포트번호 없이 기본 주소로 요청이 올 때도 Jira/Confluence 서비스인 것처럼 처리하기 위해 Apache VirtualHost 를 구성해서 리버스 프록시를 만들기로 했다.</description>
+    </item>
+    
+  </channel>
+</rss>

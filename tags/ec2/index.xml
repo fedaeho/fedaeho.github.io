@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>EC2 on fedaeho</title>
+    <link>https://fedaeho.github.io/tags/ec2/</link>
+    <description>Recent content in EC2 on fedaeho</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ko-KR</language>
+    <lastBuildDate>Sat, 09 Jan 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://fedaeho.github.io/tags/ec2/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>EC2에서 Windows Server Instacne 설정</title>
+      <link>https://fedaeho.github.io/posts/2021-01-09-ec2_guide/</link>
+      <pubDate>Sat, 09 Jan 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/posts/2021-01-09-ec2_guide/</guid>
+      <description>EC2 Windows Server Setting Guide 인스턴스 시작 을 눌러 새 인스턴스 생성 왼쪽 메뉴에서 &amp;ldquo;프리 티어만&amp;rdquo; 체크박스를 선택한 후, Windows 검색. Microsoft Windows Server 2019 Base 선택 Free-tier 사용 위해 t2.micro 선택 인스턴스 목록에서 생성한 인스턴스를 확인할 수 있음. 인스턴스 ID를 클릭하여 세부 내용 확인 인스턴스 요약 메뉴의 우측 상단에 위치한 연결 버튼 클릭 RDP 클라이언트 메뉴를 선택한 후, 원격 데스크톱 파일 다운로드 RDP(Remote Desktop Protocol) 클라이언트를 통해서 서버에 VNC 처럼 리모트 연결이 가능 Windows Remote Desktop 클라이언트는 하기 링크에서 다운로드 가능 Mac OS Windows 암호 가져오기 메뉴를 클릭하고, 기존에 AWS에서 등록하였던 키페어를 업로드하여 암호 보기 다운로드 받은 .</description>
+    </item>
+    
+  </channel>
+</rss>

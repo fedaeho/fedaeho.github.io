@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Tags on fedaeho</title>
+    <link>https://fedaeho.github.io/tags/</link>
+    <description>Recent content in Tags on fedaeho</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ko-KR</language>
+    <lastBuildDate>Tue, 26 Jul 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://fedaeho.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>k8s</title>
+      <link>https://fedaeho.github.io/tags/k8s/</link>
+      <pubDate>Tue, 26 Jul 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/tags/k8s/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Zeppline</title>
+      <link>https://fedaeho.github.io/tags/zeppline/</link>
+      <pubDate>Tue, 26 Jul 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/tags/zeppline/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>EC2</title>
+      <link>https://fedaeho.github.io/tags/ec2/</link>
+      <pubDate>Sat, 09 Jan 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/tags/ec2/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>WindowsServer</title>
+      <link>https://fedaeho.github.io/tags/windowsserver/</link>
+      <pubDate>Sat, 09 Jan 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/tags/windowsserver/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>GAN</title>
+      <link>https://fedaeho.github.io/tags/gan/</link>
+      <pubDate>Mon, 26 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/tags/gan/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Apache</title>
+      <link>https://fedaeho.github.io/tags/apache/</link>
+      <pubDate>Sun, 15 Sep 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/tags/apache/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Confluence</title>
+      <link>https://fedaeho.github.io/tags/confluence/</link>
+      <pubDate>Sun, 15 Sep 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/tags/confluence/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>HTTPS</title>
+      <link>https://fedaeho.github.io/tags/https/</link>
+      <pubDate>Sun, 15 Sep 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/tags/https/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Jira</title>
+      <link>https://fedaeho.github.io/tags/jira/</link>
+      <pubDate>Sun, 15 Sep 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/tags/jira/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>PIC</title>
+      <link>https://fedaeho.github.io/tags/pic/</link>
+      <pubDate>Tue, 12 Jun 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/tags/pic/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>python</title>
+      <link>https://fedaeho.github.io/tags/python/</link>
+      <pubDate>Tue, 12 Jun 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/tags/python/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>virtualenv</title>
+      <link>https://fedaeho.github.io/tags/virtualenv/</link>
+      <pubDate>Tue, 12 Jun 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/tags/virtualenv/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>virtualenvwrapper</title>
+      <link>https://fedaeho.github.io/tags/virtualenvwrapper/</link>
+      <pubDate>Tue, 12 Jun 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/tags/virtualenvwrapper/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

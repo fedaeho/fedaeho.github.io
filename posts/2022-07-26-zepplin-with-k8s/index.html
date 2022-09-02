@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>On-prem k8s 에 Zepplin 설치하기 | fedaeho</title>
+<meta name="keywords" content="Zeppline, k8s">
+<meta name="description" content="Zeppelin on Kubernetes 를 주로 참고하였다.
+Zepplin on k8s 설치 curl -s -O https://raw.githubusercontent.com/apache/zeppelin/master/k8s/zeppelin-server.yaml kubectl apply -f zepplin-server.yaml 이대로 실행하면 apache/zepplin-server:... 이미지를 찾을 수 없다며 ImagePullingBackoff 오류가 발생한다. docker hub 를 확인해보면 apache/zepplin 는 있지만 apache/zepplin-server 가 없는 것을 확인할 수 있다. 따라서 config 에서 해당 이미지를 사용하는 부분을 아래와 같이 교체한다.
+# ZEPPELIN_K8S_CONTAINER_IMAGE: apache/zeppelin-interpreter:0.10.0 ZEPPELIN_K8S_CONTAINER_IMAGE: apache/zeppelin:0.10.0 ... containers: - name: zeppelin-server # image: apache/zeppelin-server:0.10.0 image: apache/zepplin:0.10.0 혹은
+sed -i &#39;s/apache\/zeppelin-interpreter/apache\/zeppelin/g&#39; zeppelin-server.">
+<meta name="author" content="">
+<link rel="canonical" href="https://fedaeho.github.io/posts/2022-07-26-zepplin-with-k8s/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.bc1149f4a72aa4858d3a9f71462f75e5884ffe8073ea9d6d5761d5663d651e20.css" integrity="sha256-vBFJ9KcqpIWNOp9xRi915YhP/oBz6p1tV2HVZj1lHiA=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://fedaeho.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://fedaeho.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://fedaeho.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://fedaeho.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://fedaeho.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+          
+          
+          delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+              {left: '\\(', right: '\\)', display: true},
+              {left: '\\[', right: '\\]', display: false}
+          ],
+          
+          throwOnError : false
+        });
+    });
+</script>
+
+
+<meta property="og:title" content="On-prem k8s 에 Zepplin 설치하기" />
+<meta property="og:description" content="Zeppelin on Kubernetes 를 주로 참고하였다.
+Zepplin on k8s 설치 curl -s -O https://raw.githubusercontent.com/apache/zeppelin/master/k8s/zeppelin-server.yaml kubectl apply -f zepplin-server.yaml 이대로 실행하면 apache/zepplin-server:... 이미지를 찾을 수 없다며 ImagePullingBackoff 오류가 발생한다. docker hub 를 확인해보면 apache/zepplin 는 있지만 apache/zepplin-server 가 없는 것을 확인할 수 있다. 따라서 config 에서 해당 이미지를 사용하는 부분을 아래와 같이 교체한다.
+# ZEPPELIN_K8S_CONTAINER_IMAGE: apache/zeppelin-interpreter:0.10.0 ZEPPELIN_K8S_CONTAINER_IMAGE: apache/zeppelin:0.10.0 ... containers: - name: zeppelin-server # image: apache/zeppelin-server:0.10.0 image: apache/zepplin:0.10.0 혹은
+sed -i &#39;s/apache\/zeppelin-interpreter/apache\/zeppelin/g&#39; zeppelin-server." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedaeho.github.io/posts/2022-07-26-zepplin-with-k8s/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-07-26T00:00:00&#43;00:00" />
+<meta property="article:modified_time" content="2022-07-26T00:00:00&#43;00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="On-prem k8s 에 Zepplin 설치하기"/>
+<meta name="twitter:description" content="Zeppelin on Kubernetes 를 주로 참고하였다.
+Zepplin on k8s 설치 curl -s -O https://raw.githubusercontent.com/apache/zeppelin/master/k8s/zeppelin-server.yaml kubectl apply -f zepplin-server.yaml 이대로 실행하면 apache/zepplin-server:... 이미지를 찾을 수 없다며 ImagePullingBackoff 오류가 발생한다. docker hub 를 확인해보면 apache/zepplin 는 있지만 apache/zepplin-server 가 없는 것을 확인할 수 있다. 따라서 config 에서 해당 이미지를 사용하는 부분을 아래와 같이 교체한다.
+# ZEPPELIN_K8S_CONTAINER_IMAGE: apache/zeppelin-interpreter:0.10.0 ZEPPELIN_K8S_CONTAINER_IMAGE: apache/zeppelin:0.10.0 ... containers: - name: zeppelin-server # image: apache/zeppelin-server:0.10.0 image: apache/zepplin:0.10.0 혹은
+sed -i &#39;s/apache\/zeppelin-interpreter/apache\/zeppelin/g&#39; zeppelin-server."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://fedaeho.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "On-prem k8s 에 Zepplin 설치하기",
+      "item": "https://fedaeho.github.io/posts/2022-07-26-zepplin-with-k8s/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "On-prem k8s 에 Zepplin 설치하기",
+  "name": "On-prem k8s 에 Zepplin 설치하기",
+  "description": "Zeppelin on Kubernetes 를 주로 참고하였다.\nZepplin on k8s 설치 curl -s -O https://raw.githubusercontent.com/apache/zeppelin/master/k8s/zeppelin-server.yaml kubectl apply -f zepplin-server.yaml 이대로 실행하면 apache/zepplin-server:... 이미지를 찾을 수 없다며 ImagePullingBackoff 오류가 발생한다. docker hub 를 확인해보면 apache/zepplin 는 있지만 apache/zepplin-server 가 없는 것을 확인할 수 있다. 따라서 config 에서 해당 이미지를 사용하는 부분을 아래와 같이 교체한다.\n# ZEPPELIN_K8S_CONTAINER_IMAGE: apache/zeppelin-interpreter:0.10.0 ZEPPELIN_K8S_CONTAINER_IMAGE: apache/zeppelin:0.10.0 ... containers: - name: zeppelin-server # image: apache/zeppelin-server:0.10.0 image: apache/zepplin:0.10.0 혹은\nsed -i \u0026#39;s/apache\\/zeppelin-interpreter/apache\\/zeppelin/g\u0026#39; zeppelin-server.",
+  "keywords": [
+    "Zeppline", "k8s"
+  ],
+  "articleBody": "Zeppelin on Kubernetes 를 주로 참고하였다.\nZepplin on k8s 설치 curl -s -O https://raw.githubusercontent.com/apache/zeppelin/master/k8s/zeppelin-server.yaml kubectl apply -f zepplin-server.yaml 이대로 실행하면 apache/zepplin-server:... 이미지를 찾을 수 없다며 ImagePullingBackoff 오류가 발생한다. docker hub 를 확인해보면 apache/zepplin 는 있지만 apache/zepplin-server 가 없는 것을 확인할 수 있다. 따라서 config 에서 해당 이미지를 사용하는 부분을 아래와 같이 교체한다.\n# ZEPPELIN_K8S_CONTAINER_IMAGE: apache/zeppelin-interpreter:0.10.0 ZEPPELIN_K8S_CONTAINER_IMAGE: apache/zeppelin:0.10.0 ... containers: - name: zeppelin-server # image: apache/zeppelin-server:0.10.0 image: apache/zepplin:0.10.0 혹은\nsed -i 's/apache\\/zeppelin-interpreter/apache\\/zeppelin/g' zeppelin-server.yaml sed -i 's/apache\\/zeppelin-server/apache\\/zeppelin/g' zeppelin-server.yaml 서비스가 정상실행되었다면 대시보드를 확인해보자. Remote 에서 확인하기 위해 임시로 address 를 추가하였다.\nkubectl port-forward zeppelin-server 8080:80 --address=0.0.0.0 yaml 에서 추가로 변경하기 좋은 키워드 Environment variable Value Description ZEPPELIN_RUN_MODE k8s Make Zeppelin run interpreter on Kubernetes ZEPPELIN_K8S_PORTFORWARD true Enable port forwarding from local Zeppelin instance to Interpreters running on Kubernetes ZEPPELIN_K8S_CONTAINER_IMAGE : Zeppelin interpreter docker image to use ZEPPELIN_K8S_SPARK_CONTAINER_IMAGE : Spark docker image to use ZEPPELIN_K8S_NAMESPACE Kubernetes namespace to use KUBERNETES_AUTH_TOKEN Kubernetes auth token to create resources 막상 k8s mode 를 설정하니, zeppelin notebook 에서 명령이 제대로 실행되지 않아, 추가로 분석이 필요하다..\nSpark on k8s 설치 TODO\nCustom zeppelin image? 가이드 문서에서는 현재 interpreter 와 server 모두 같은 이미지를 사용하고 있다고 언급되어 있다.\nPV 설정, zeppelin-server.yaml 에서 interpreter 이미지 폴더를 mount 해서 custom interpreter 를 사용하도록 설정할 수 있다.\n기타 server 와 interpreter 를 위한 Dockerfile 도 zeppline github 에서 찾을 수 있지만 테스트가 필요하다.\nMulti-user 공식에서는 shiro 를 사용한다. DEX 를 붙일 수 있는 방법은 없을까..?\nReference Zeppelin on Kubernetes with Connections naver place zeppelin\nimplementaing apache zeppelin in\n",
+  "wordCount" : "245",
+  "inLanguage": "en",
+  "datePublished": "2022-07-26T00:00:00Z",
+  "dateModified": "2022-07-26T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://fedaeho.github.io/posts/2022-07-26-zepplin-with-k8s/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "fedaeho",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://fedaeho.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://fedaeho.github.io/" accesskey="h" title="fedaeho (Alt + H)">fedaeho</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://fedaeho.github.io/archives" title="Archive">
+                    <span>Archive</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://fedaeho.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://fedaeho.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      On-prem k8s 에 Zepplin 설치하기
+    </h1>
+    <div class="post-meta"><span title='2022-07-26 00:00:00 +0000 UTC'>July 26, 2022</span>
+
+</div>
+  </header> 
+  <div class="post-content"><p><a href="https://zeppelin.apache.org/docs/0.10.1/quickstart/kubernetes.html">Zeppelin on Kubernetes</a> 를 주로 참고하였다.</p>
+<h1 id="zepplin-on-k8s-설치">Zepplin on k8s 설치<a hidden class="anchor" aria-hidden="true" href="#zepplin-on-k8s-설치">#</a></h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>curl -s -O https://raw.githubusercontent.com/apache/zeppelin/master/k8s/zeppelin-server.yaml
+</span></span><span style="display:flex;"><span>kubectl apply -f zepplin-server.yaml
+</span></span></code></pre></div><p>이대로 실행하면 <code>apache/zepplin-server:...</code> 이미지를 찾을 수 없다며 <code>ImagePullingBackoff</code> 오류가 발생한다. docker hub 를 확인해보면 <code>apache/zepplin</code> 는 있지만 <code>apache/zepplin-server</code> 가 없는 것을 확인할 수 있다. 따라서 config 에서 해당 이미지를 사용하는 부분을 아래와 같이 교체한다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span> <span style="color:#75715e"># ZEPPELIN_K8S_CONTAINER_IMAGE: apache/zeppelin-interpreter:0.10.0</span>
+</span></span><span style="display:flex;"><span> <span style="color:#f92672">ZEPPELIN_K8S_CONTAINER_IMAGE</span>: <span style="color:#ae81ff">apache/zeppelin:0.10.0</span>
+</span></span><span style="display:flex;"><span> <span style="color:#ae81ff">...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">containers</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">zeppelin-server</span>
+</span></span><span style="display:flex;"><span> <span style="color:#75715e">#     image: apache/zeppelin-server:0.10.0</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">image</span>: <span style="color:#ae81ff">apache/zepplin:0.10.0</span>
+</span></span></code></pre></div><p>혹은</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sed -i <span style="color:#e6db74">&#39;s/apache\/zeppelin-interpreter/apache\/zeppelin/g&#39;</span> zeppelin-server.yaml
+</span></span><span style="display:flex;"><span>sed -i <span style="color:#e6db74">&#39;s/apache\/zeppelin-server/apache\/zeppelin/g&#39;</span> zeppelin-server.yaml
+</span></span></code></pre></div><p>서비스가 정상실행되었다면 대시보드를 확인해보자. Remote 에서 확인하기 위해 임시로 address 를 추가하였다.</p>
+<pre tabindex="0"><code>kubectl port-forward zeppelin-server 8080:80 --address=0.0.0.0
+</code></pre><ul>
+<li>yaml 에서 추가로 변경하기 좋은 키워드</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Environment variable</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ZEPPELIN_RUN_MODE</td>
+<td>k8s</td>
+<td>Make Zeppelin run interpreter on Kubernetes</td>
+</tr>
+<tr>
+<td>ZEPPELIN_K8S_PORTFORWARD</td>
+<td>true</td>
+<td>Enable port forwarding from local Zeppelin instance to Interpreters running on Kubernetes</td>
+</tr>
+<tr>
+<td>ZEPPELIN_K8S_CONTAINER_IMAGE</td>
+<td><!-- raw HTML omitted -->:<!-- raw HTML omitted --></td>
+<td>Zeppelin interpreter docker image to use</td>
+</tr>
+<tr>
+<td>ZEPPELIN_K8S_SPARK_CONTAINER_IMAGE</td>
+<td><!-- raw HTML omitted -->:<!-- raw HTML omitted --></td>
+<td>Spark docker image to use</td>
+</tr>
+<tr>
+<td>ZEPPELIN_K8S_NAMESPACE</td>
+<td><!-- raw HTML omitted --></td>
+<td>Kubernetes namespace to use</td>
+</tr>
+<tr>
+<td>KUBERNETES_AUTH_TOKEN</td>
+<td><!-- raw HTML omitted --></td>
+<td>Kubernetes auth token to create resources</td>
+</tr>
+</tbody>
+</table>
+<p>막상 k8s mode 를 설정하니, zeppelin notebook 에서 명령이 제대로 실행되지 않아, 추가로 분석이 필요하다..</p>
+<h1 id="spark-on-k8s-설치">Spark on k8s 설치<a hidden class="anchor" aria-hidden="true" href="#spark-on-k8s-설치">#</a></h1>
+<blockquote>
+<p>TODO</p>
+</blockquote>
+<h1 id="custom-zeppelin-image">Custom zeppelin image?<a hidden class="anchor" aria-hidden="true" href="#custom-zeppelin-image">#</a></h1>
+<p>가이드 문서에서는 현재 interpreter 와 server 모두 같은 이미지를 사용하고 있다고 언급되어 있다.</p>
+<p>PV 설정, zeppelin-server.yaml 에서 interpreter 이미지 폴더를 mount 해서 custom interpreter 를 사용하도록 설정할 수 있다.</p>
+<p>기타 server 와 interpreter 를 위한 Dockerfile 도 <a href="https://github.com/apache/zeppelin">zeppline github</a> 에서 찾을 수 있지만 테스트가 필요하다.</p>
+<h1 id="multi-user">Multi-user<a hidden class="anchor" aria-hidden="true" href="#multi-user">#</a></h1>
+<p>공식에서는 shiro 를 사용한다.
+DEX 를 붙일 수 있는 방법은 없을까..?</p>
+<h2 id="reference">Reference<a hidden class="anchor" aria-hidden="true" href="#reference">#</a></h2>
+<p><a href="http://incredible.ai/zeppelin/2021/12/15/Zeppelin-on-Kubernetes/">Zeppelin on Kubernetes with Connections
+</a></p>
+<p><a href="https://medium.com/naver-place-dev/setup-zeppelin-with-k8s-mode-on-naver-container-cluster-896ca9815ca2">naver place zeppelin</a></p>
+<p><a href="https://pliben1994.medium.com/implementing-apache-zeppelin-in-kubernetes-e9a3c5be8df">implementaing apache zeppelin in</a></p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://fedaeho.github.io/tags/zeppline/">Zeppline</a></li>
+      <li><a href="https://fedaeho.github.io/tags/k8s/">k8s</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2022 <a href="https://fedaeho.github.io/">fedaeho</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

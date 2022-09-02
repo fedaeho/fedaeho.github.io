@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Virtualenvwrapper 로 python virtualenv 설정하기 | fedaeho</title>
+<meta name="keywords" content="python, virtualenv, virtualenvwrapper">
+<meta name="description" content="Virtualenv Python은 한 라이브러리 묶음에 한가지 버전만 사용 가능하다. 따라서 어떤 프로그램이 특정한 라이브러리와 특정한 Python 버전을 필요로 한다면(이를 denpendency, 한국어로 의존성이라고 한다), 파이썬을 따로 설치하는 방법 밖에 없다.
+sudo 가 아닌 일반 유저가 서버에서 Python을 사용하는 경우, 일반적으로는 서버에 설치되어 있는 Python 버전만이 사용가능하다. 2018년 기준으로 대부분 서버에서 기본으로 설정되어있는 Python 버전은 2.7 과 3.6 이다.
+이러한 Python 버전과 패키지를 각각의 유저가 원하는 환경에 맞추어 관리하기 위해서는 주로 다음과 같은 방법이 사용된다.">
+<meta name="author" content="">
+<link rel="canonical" href="https://fedaeho.github.io/posts/2018-08-17-python-env-guide/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.bc1149f4a72aa4858d3a9f71462f75e5884ffe8073ea9d6d5761d5663d651e20.css" integrity="sha256-vBFJ9KcqpIWNOp9xRi915YhP/oBz6p1tV2HVZj1lHiA=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://fedaeho.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://fedaeho.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://fedaeho.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://fedaeho.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://fedaeho.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+          
+          
+          delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+              {left: '\\(', right: '\\)', display: true},
+              {left: '\\[', right: '\\]', display: false}
+          ],
+          
+          throwOnError : false
+        });
+    });
+</script>
+
+
+<meta property="og:title" content="Virtualenvwrapper 로 python virtualenv 설정하기" />
+<meta property="og:description" content="Virtualenv Python은 한 라이브러리 묶음에 한가지 버전만 사용 가능하다. 따라서 어떤 프로그램이 특정한 라이브러리와 특정한 Python 버전을 필요로 한다면(이를 denpendency, 한국어로 의존성이라고 한다), 파이썬을 따로 설치하는 방법 밖에 없다.
+sudo 가 아닌 일반 유저가 서버에서 Python을 사용하는 경우, 일반적으로는 서버에 설치되어 있는 Python 버전만이 사용가능하다. 2018년 기준으로 대부분 서버에서 기본으로 설정되어있는 Python 버전은 2.7 과 3.6 이다.
+이러한 Python 버전과 패키지를 각각의 유저가 원하는 환경에 맞추어 관리하기 위해서는 주로 다음과 같은 방법이 사용된다." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedaeho.github.io/posts/2018-08-17-python-env-guide/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2018-06-12T00:00:00&#43;00:00" />
+<meta property="article:modified_time" content="2018-06-12T00:00:00&#43;00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Virtualenvwrapper 로 python virtualenv 설정하기"/>
+<meta name="twitter:description" content="Virtualenv Python은 한 라이브러리 묶음에 한가지 버전만 사용 가능하다. 따라서 어떤 프로그램이 특정한 라이브러리와 특정한 Python 버전을 필요로 한다면(이를 denpendency, 한국어로 의존성이라고 한다), 파이썬을 따로 설치하는 방법 밖에 없다.
+sudo 가 아닌 일반 유저가 서버에서 Python을 사용하는 경우, 일반적으로는 서버에 설치되어 있는 Python 버전만이 사용가능하다. 2018년 기준으로 대부분 서버에서 기본으로 설정되어있는 Python 버전은 2.7 과 3.6 이다.
+이러한 Python 버전과 패키지를 각각의 유저가 원하는 환경에 맞추어 관리하기 위해서는 주로 다음과 같은 방법이 사용된다."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://fedaeho.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Virtualenvwrapper 로 python virtualenv 설정하기",
+      "item": "https://fedaeho.github.io/posts/2018-08-17-python-env-guide/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Virtualenvwrapper 로 python virtualenv 설정하기",
+  "name": "Virtualenvwrapper 로 python virtualenv 설정하기",
+  "description": "Virtualenv Python은 한 라이브러리 묶음에 한가지 버전만 사용 가능하다. 따라서 어떤 프로그램이 특정한 라이브러리와 특정한 Python 버전을 필요로 한다면(이를 denpendency, 한국어로 의존성이라고 한다), 파이썬을 따로 설치하는 방법 밖에 없다.\nsudo 가 아닌 일반 유저가 서버에서 Python을 사용하는 경우, 일반적으로는 서버에 설치되어 있는 Python 버전만이 사용가능하다. 2018년 기준으로 대부분 서버에서 기본으로 설정되어있는 Python 버전은 2.7 과 3.6 이다.\n이러한 Python 버전과 패키지를 각각의 유저가 원하는 환경에 맞추어 관리하기 위해서는 주로 다음과 같은 방법이 사용된다.",
+  "keywords": [
+    "python", "virtualenv", "virtualenvwrapper"
+  ],
+  "articleBody": "Virtualenv Python은 한 라이브러리 묶음에 한가지 버전만 사용 가능하다. 따라서 어떤 프로그램이 특정한 라이브러리와 특정한 Python 버전을 필요로 한다면(이를 denpendency, 한국어로 의존성이라고 한다), 파이썬을 따로 설치하는 방법 밖에 없다.\nsudo 가 아닌 일반 유저가 서버에서 Python을 사용하는 경우, 일반적으로는 서버에 설치되어 있는 Python 버전만이 사용가능하다. 2018년 기준으로 대부분 서버에서 기본으로 설정되어있는 Python 버전은 2.7 과 3.6 이다.\n이러한 Python 버전과 패키지를 각각의 유저가 원하는 환경에 맞추어 관리하기 위해서는 주로 다음과 같은 방법이 사용된다.\nConda 기본적으로 의존성을 검증한 패키지만을 설치할 수 있으므로, 안정성이 높다. 프로그래밍 지식이 부족한 경우에도 가장 간편하게 설치할 수 있다. Virtualenv 의존성을 검증하지 않은 다양한 패키지를 설치할 수 있다. Conda에 비해 가볍다. (독립된 env를 만들어주기만 할 뿐, 나머지는 사용자 재량이다.) 단점 가장 기본적인 만큼 pip 등의 파이썬 환경에 대한 이해가 필요하다. wrapper 등이 없으면 사용하기 불편하다. Docker 다른 방법에 비해서 훨씬 범위가 크다. (Python 이 아닌, OS 스케일에서의 환경을 제공하므로, CUDA 버전 또한 별개로 관리가 가능하다.) Virtual machine 이 아니고, 따라서 메모리나 CPU를 항상 점유하지 않아도 되지만, VM과 같은 명령 실행 환경을 제공한다. 단점 Learning Cost 가 크다. - 파일 이동 시에도 별도의 명령어를 사용하거나, 공유 폴더를 생성하는 등의 방법을 필요로 한다. 참고 : 개발자가 처음 docker 접할때 오는 멘붕 몇가지/ Virtualenvwrapper 설치 Vitualenv는 Python 패키지 환경을 시스템 환경 혹은 유저 환경과 독립적으로 제공하고 분리하여, 어플리케이션 별로 의존성이 다른 환경을 가상으로 만들어내고, 각각의 env를 개별적으로 관리할 수 있는 이점이 있다. 단, 일반적인 virtualenv를 사용하는 경우, env가 설치되어 있는 폴더명을 직접 입력하여, env를 activate 해야한다. 이 때, virtualenvwrapper 를 이용하면 env를 좀 더 간편하게 실행할 수 있다.\n우분투 터미널에서 아래의 명령어를 입력한다. (pip는 이미 설치되어있다고 가정한다.) 이 때, pip 에서 사용된 --user 옵션은 사용자 디렉토리에 패키지를 설치하라는 뜻이다. virtualenvwrapper 의 경우, env를 관리해주는 패키지므로 모든 유저가 사용할 수 있도록 root 권한으로 설치하여도 무방하다.\n$ pip install --user virtualenvwrapper $ sudo -H pip install virtualenvwrapper # sudo 권한 있을시 터미널에서 which virtualenv 를 입력해보면 다음과 같이 virtualenv가 설치된 디렉토리를 확인할 수 있다. (user 옵션을 사용하지 않았다면, 다른 디렉토리가 나올 것이다.)\n$ /home/user/.local/bin/virtualenv $ /usr/local/bin/virtualenv # sudo -H 옵션으로 설치시 이 상태에서는 터미널에서 virtualenv 관련 명령어를 입력해도 작동하지 않는다. 이를 위해 bash 환경설정에서 virtualenv 가 설치되어있는 PATH를 추가해준다.\n$ vi ~/.bashrc # 열린 메모장 마지막에 다음 코드 3줄 추가 export WORKON_HOME=~/.virtualenvs export VIRTUALENVWRAPPER_PYTHON=\"$(which python3)\" source ~/.local/bin/virtualenvwrapper.sh # virtualenv setting, sudo 일 경우 export WORKON_HOME=~/.virtualenvs export VIRTUALENVWRAPPER_PYTHON=\"$(which python3)\" source /usr/local/bin/virtualenvwrapper.sh $ source ~/.bashrc # 변경한 설정을 구동함 이제, env를 만든다. env_name 은 사용자가 원하는 것으로 지정한다. 따로 python 버전을 지정하지 않는 경우, 서버에 설치되어있는 기본 버전을 따른다.\n$ mkvirtualenv env_name 만일 env 가 잘 만들어졌다면, 다음과 같이 터미널이 변경되어 있을 것이다.\n(env_name)user_name@server:~$ env 실행 및 종료는 다음과 같다.\n$ deactivate #env 종료 $ workon env_name #env 실행 Python 버전 지정해서 설치하기 이 때, env 에 설치되는 python 버전은 서버의 기본 python 버전과 동일하다. 만일 다른 python 버전을 설치하고 싶다면 다음과 같이 입력한다.\n$ mkvirtualenv -p python2.7 env_name $ mkvirtualenv --python=python3.6 env_name 다른 Env에서 패키지 불러오기 #패키지를 불러오려는 env에서 다음과 같이 입력 $ pip freeze \u003erequirements.txt #패키지를 설치하려는 env에서 다음과 같이 입력 $ pip install -r requirements.txt #또는 env를 만들 때 -r 옵션을 추가해도 됨. $ mkvirtualenv -p python3.6 env_name -r requirements.txt pip를 이용한 Package 설치 및 관리 일반적인 python package는 pip 를 통해 간편하게 설치가 가능하다. 아래의 pkg_name에 원하는 패키지 이름을 입력하기만 하면된다.\n(* conda env 에서도 pip를 이용할 수 있다.) (** 패키지 설치시에는 env가 실행되어 있는 상태여야 한다.)\n$ pip install pkg_name 이외에, 간혹 env에 패키지를 추가적으로 설치하지 않고 시스템에 설치되어 있는 패키지를 사용하고 싶을 때가 있다. 이 때, 아래와 같이 env가 활성화 되어 있는 상태에서 명령어를 입력하면 global 패키지, 즉 user 에 귀속되거나, 시스템 자체에 귀속된 라이브러리를 그대로 사용할 수 있다. (이미 toggle 되어있는 경우, ...disabled 이라는 출력이 나오면서 해제되니 유의할 것)\n$ toggleglobalsitepackages ",
+  "wordCount" : "604",
+  "inLanguage": "en",
+  "datePublished": "2018-06-12T00:00:00Z",
+  "dateModified": "2018-06-12T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://fedaeho.github.io/posts/2018-08-17-python-env-guide/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "fedaeho",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://fedaeho.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://fedaeho.github.io/" accesskey="h" title="fedaeho (Alt + H)">fedaeho</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://fedaeho.github.io/archives" title="Archive">
+                    <span>Archive</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://fedaeho.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://fedaeho.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      Virtualenvwrapper 로 python virtualenv 설정하기
+    </h1>
+    <div class="post-meta"><span title='2018-06-12 00:00:00 +0000 UTC'>June 12, 2018</span>
+
+</div>
+  </header> 
+  <div class="post-content"><h1 id="virtualenv">Virtualenv<a hidden class="anchor" aria-hidden="true" href="#virtualenv">#</a></h1>
+<p>Python은 한 라이브러리 묶음에 한가지 버전만 사용 가능하다. 따라서 어떤 프로그램이 특정한 라이브러리와 특정한 Python 버전을 필요로 한다면(이를 <code>denpendency</code>, 한국어로 의존성이라고 한다), 파이썬을 따로 설치하는 방법 밖에 없다.</p>
+<p><code>sudo</code> 가 아닌 일반 유저가 서버에서 Python을 사용하는 경우, 일반적으로는 서버에 설치되어 있는 Python 버전만이 사용가능하다. 2018년 기준으로 대부분 서버에서 기본으로 설정되어있는 Python 버전은 <code>2.7</code> 과 <code>3.6</code> 이다.</p>
+<p>이러한 Python 버전과 패키지를 각각의 유저가 원하는 환경에 맞추어 관리하기 위해서는 주로 다음과 같은 방법이 사용된다.</p>
+<ul>
+<li>Conda
+<ul>
+<li>기본적으로 의존성을 검증한 패키지만을 설치할 수 있으므로, 안정성이 높다.</li>
+<li>프로그래밍 지식이 부족한 경우에도 가장 간편하게 설치할 수 있다.</li>
+</ul>
+</li>
+<li>Virtualenv
+<ul>
+<li>의존성을 검증하지 않은 다양한 패키지를 설치할 수 있다.</li>
+<li>Conda에 비해 가볍다. (독립된 env를 만들어주기만 할 뿐, 나머지는 사용자 재량이다.)</li>
+<li>단점
+<ul>
+<li>가장 기본적인 만큼 pip 등의 파이썬 환경에 대한 이해가 필요하다.</li>
+<li>wrapper 등이 없으면 사용하기 불편하다.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Docker
+<ul>
+<li>다른 방법에 비해서 훨씬 범위가 크다. (Python 이 아닌, OS 스케일에서의 환경을 제공하므로, CUDA 버전 또한 별개로 관리가 가능하다.)</li>
+<li>Virtual machine 이 아니고, 따라서 메모리나 CPU를 항상 점유하지 않아도 되지만, VM과 같은 명령 실행 환경을 제공한다.</li>
+<li>단점
+<ul>
+<li>Learning Cost 가 크다. - 파일 이동 시에도 별도의 명령어를 사용하거나, 공유 폴더를 생성하는 등의 방법을 필요로 한다.</li>
+</ul>
+</li>
+<li>참고 : <a href="https://www.popit.kr/%EA%B0%9C%EB%B0%9C%EC%9E%90%EA%B0%80-%EC%B2%98%EC%9D%8C-docker-%EC%A0%91%ED%95%A0%EB%95%8C-%EC%98%A4%EB%8A%94-%EB%A9%98%EB%B6%95-%EB%AA%87%EA%B0%80%EC%A7%80/">개발자가 처음 docker 접할때 오는 멘붕 몇가지/</a></li>
+</ul>
+</li>
+</ul>
+<h1 id="virtualenvwrapper-설치">Virtualenvwrapper 설치<a hidden class="anchor" aria-hidden="true" href="#virtualenvwrapper-설치">#</a></h1>
+<p>Vitualenv는 Python 패키지 환경을 시스템 환경 혹은 유저 환경과 독립적으로 제공하고 분리하여, 어플리케이션 별로 의존성이 다른 환경을 가상으로 만들어내고, 각각의 env를 개별적으로 관리할 수 있는 이점이 있다.
+단, 일반적인 virtualenv를 사용하는 경우, env가 설치되어 있는 폴더명을 직접 입력하여, env를 activate 해야한다.
+이 때, <code>virtualenvwrapper</code> 를 이용하면 env를 좀 더 간편하게 실행할 수 있다.</p>
+<p>우분투 터미널에서 아래의 명령어를 입력한다. (pip는 이미 설치되어있다고 가정한다.) 이 때, <code>pip</code> 에서 사용된 <code>--user</code> 옵션은 사용자 디렉토리에 패키지를 설치하라는 뜻이다. <code>virtualenvwrapper</code> 의 경우, env를 관리해주는 패키지므로 모든 유저가 사용할 수 있도록 root 권한으로 설치하여도 무방하다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ pip install --user virtualenvwrapper
+</span></span><span style="display:flex;"><span>$ sudo -H pip install virtualenvwrapper <span style="color:#75715e"># sudo 권한 있을시</span>
+</span></span></code></pre></div><p>터미널에서 <code>which virtualenv</code> 를 입력해보면 다음과 같이 virtualenv가 설치된 디렉토리를 확인할 수 있다. (user 옵션을 사용하지 않았다면, 다른 디렉토리가 나올 것이다.)</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ /home/user/.local/bin/virtualenv
+</span></span><span style="display:flex;"><span>$ /usr/local/bin/virtualenv <span style="color:#75715e"># sudo -H 옵션으로 설치시</span>
+</span></span></code></pre></div><p>이 상태에서는 터미널에서 virtualenv 관련 명령어를 입력해도  작동하지 않는다. 이를 위해 bash 환경설정에서 virtualenv 가 설치되어있는 PATH를 추가해준다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ vi ~/.bashrc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 열린 메모장 마지막에 다음 코드 3줄 추가</span>
+</span></span><span style="display:flex;"><span>export WORKON_HOME<span style="color:#f92672">=</span>~/.virtualenvs
+</span></span><span style="display:flex;"><span>export VIRTUALENVWRAPPER_PYTHON<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>which python3<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>source ~/.local/bin/virtualenvwrapper.sh
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># virtualenv setting, sudo 일 경우</span>
+</span></span><span style="display:flex;"><span>export WORKON_HOME<span style="color:#f92672">=</span>~/.virtualenvs
+</span></span><span style="display:flex;"><span>export VIRTUALENVWRAPPER_PYTHON<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>which python3<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>source /usr/local/bin/virtualenvwrapper.sh
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>$ source ~/.bashrc
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 변경한 설정을 구동함</span>
+</span></span></code></pre></div><p>이제, env를 만든다. <code>env_name</code> 은 사용자가 원하는 것으로 지정한다. 따로 python 버전을 지정하지 않는 경우, 서버에 설치되어있는 기본 버전을 따른다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ mkvirtualenv env_name
+</span></span></code></pre></div><p>만일 env 가 잘 만들어졌다면, 다음과 같이 터미널이 변경되어 있을 것이다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#f92672">(</span>env_name<span style="color:#f92672">)</span>user_name@server:~$
+</span></span></code></pre></div><p>env 실행 및 종료는 다음과 같다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ deactivate
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#env 종료</span>
+</span></span><span style="display:flex;"><span>$ workon env_name
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#env 실행</span>
+</span></span></code></pre></div><h2 id="python-버전-지정해서-설치하기">Python 버전 지정해서 설치하기<a hidden class="anchor" aria-hidden="true" href="#python-버전-지정해서-설치하기">#</a></h2>
+<p>이 때, env 에 설치되는 python 버전은 서버의 기본 python 버전과 동일하다. 만일 다른 python 버전을 설치하고 싶다면 다음과 같이 입력한다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ mkvirtualenv -p python2.7 env_name
+</span></span><span style="display:flex;"><span>$ mkvirtualenv --python<span style="color:#f92672">=</span>python3.6 env_name
+</span></span></code></pre></div><h2 id="다른-env에서-패키지-불러오기">다른 Env에서 패키지 불러오기<a hidden class="anchor" aria-hidden="true" href="#다른-env에서-패키지-불러오기">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#패키지를 불러오려는 env에서 다음과 같이 입력</span>
+</span></span><span style="display:flex;"><span>$ pip freeze &gt;requirements.txt
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#패키지를 설치하려는 env에서 다음과 같이 입력</span>
+</span></span><span style="display:flex;"><span>$ pip install -r requirements.txt
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#또는 env를 만들 때 -r 옵션을 추가해도 됨.</span>
+</span></span><span style="display:flex;"><span>$ mkvirtualenv -p python3.6 env_name -r requirements.txt
+</span></span></code></pre></div><h2 id="pip를-이용한-package-설치-및-관리">pip를 이용한 Package 설치 및 관리<a hidden class="anchor" aria-hidden="true" href="#pip를-이용한-package-설치-및-관리">#</a></h2>
+<p>일반적인 python package는 <code>pip</code> 를 통해 간편하게 설치가 가능하다. 아래의 <code>pkg_name</code>에 원하는 패키지 이름을 입력하기만 하면된다.</p>
+<p>(* conda env 에서도 pip를 이용할 수 있다.)
+(** 패키지 설치시에는 env가 실행되어 있는 상태여야 한다.)</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ pip install pkg_name
+</span></span></code></pre></div><p>이외에, 간혹 env에 패키지를 추가적으로 설치하지 않고 시스템에 설치되어 있는 패키지를 사용하고 싶을 때가 있다.  이 때, 아래와 같이 env가 활성화 되어 있는 상태에서 명령어를 입력하면 global 패키지, 즉 user 에 귀속되거나, 시스템 자체에 귀속된 라이브러리를 그대로 사용할 수 있다.
+(이미 toggle 되어있는 경우, <code>...disabled</code> 이라는 출력이 나오면서 해제되니 유의할 것)</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ toggleglobalsitepackages
+</span></span></code></pre></div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://fedaeho.github.io/tags/python/">python</a></li>
+      <li><a href="https://fedaeho.github.io/tags/virtualenv/">virtualenv</a></li>
+      <li><a href="https://fedaeho.github.io/tags/virtualenvwrapper/">virtualenvwrapper</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2022 <a href="https://fedaeho.github.io/">fedaeho</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

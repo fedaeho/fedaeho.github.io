@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>PIC on fedaeho</title>
+    <link>https://fedaeho.github.io/tags/pic/</link>
+    <description>Recent content in PIC on fedaeho</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ko-KR</language>
+    <lastBuildDate>Tue, 12 Jun 2018 00:00:00 +0000</lastBuildDate><atom:link href="https://fedaeho.github.io/tags/pic/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>PIC</title>
+      <link>https://fedaeho.github.io/posts/2018-06-12-pic/</link>
+      <pubDate>Tue, 12 Jun 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/posts/2018-06-12-pic/</guid>
+      <description>Particle-based simulation of plasmas 1. Types of interacting systems 1.1 weakly/stronly interacting system Consider a system
+Collection of charged ptcls. in a box box with the side of the $\lambda_D$ measure E-field at local pt. Strongly coupled system
+If few particles exist,measurement would be very jumpy. As a ptcl passes by the detector, the measurement detects a jump up. When a ptcl moves away it detects a jump down. On avg, at any give time, very few ptcls are near the detector.</description>
+    </item>
+    
+  </channel>
+</rss>

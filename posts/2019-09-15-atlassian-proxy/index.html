@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Jira, Confluence 에 HTTPS 달기 - Apache Proxy 구성 | fedaeho</title>
+<meta name="keywords" content="Apache, Jira, Confluence, HTTPS">
+<meta name="description" content="팀에서 운영하고 있는 Jira, Confluence 가 외부 접속이 가능함에도 불구하고 HTTPS 인증서가 설치되어 있지 않았다. 이외에도 보안상 취약점이 여럿 발견되었기에, Apache Proxy 설정 을 참고하여 설정하였다.
+VirtualHost 구성하기 팀에서 운영하는 Jira/Confluence 는 Atlassian 설정 파일을 외부 접근 가능한 주소로 바꾸고 DNS 업체에 해당 주소에 맞게 도메인만 물리고 포트 번호를 숨기지 않았다. 따라서, 포트번호 없이 기본 주소로 요청이 올 때도 Jira/Confluence 서비스인 것처럼 처리하기 위해 Apache VirtualHost 를 구성해서 리버스 프록시를 만들기로 했다.">
+<meta name="author" content="">
+<link rel="canonical" href="https://fedaeho.github.io/posts/2019-09-15-atlassian-proxy/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.bc1149f4a72aa4858d3a9f71462f75e5884ffe8073ea9d6d5761d5663d651e20.css" integrity="sha256-vBFJ9KcqpIWNOp9xRi915YhP/oBz6p1tV2HVZj1lHiA=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://fedaeho.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://fedaeho.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://fedaeho.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://fedaeho.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://fedaeho.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+          
+          
+          delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+              {left: '\\(', right: '\\)', display: true},
+              {left: '\\[', right: '\\]', display: false}
+          ],
+          
+          throwOnError : false
+        });
+    });
+</script>
+
+
+<meta property="og:title" content="Jira, Confluence 에 HTTPS 달기 - Apache Proxy 구성" />
+<meta property="og:description" content="팀에서 운영하고 있는 Jira, Confluence 가 외부 접속이 가능함에도 불구하고 HTTPS 인증서가 설치되어 있지 않았다. 이외에도 보안상 취약점이 여럿 발견되었기에, Apache Proxy 설정 을 참고하여 설정하였다.
+VirtualHost 구성하기 팀에서 운영하는 Jira/Confluence 는 Atlassian 설정 파일을 외부 접근 가능한 주소로 바꾸고 DNS 업체에 해당 주소에 맞게 도메인만 물리고 포트 번호를 숨기지 않았다. 따라서, 포트번호 없이 기본 주소로 요청이 올 때도 Jira/Confluence 서비스인 것처럼 처리하기 위해 Apache VirtualHost 를 구성해서 리버스 프록시를 만들기로 했다." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedaeho.github.io/posts/2019-09-15-atlassian-proxy/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2019-09-15T00:00:00&#43;00:00" />
+<meta property="article:modified_time" content="2019-09-15T00:00:00&#43;00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Jira, Confluence 에 HTTPS 달기 - Apache Proxy 구성"/>
+<meta name="twitter:description" content="팀에서 운영하고 있는 Jira, Confluence 가 외부 접속이 가능함에도 불구하고 HTTPS 인증서가 설치되어 있지 않았다. 이외에도 보안상 취약점이 여럿 발견되었기에, Apache Proxy 설정 을 참고하여 설정하였다.
+VirtualHost 구성하기 팀에서 운영하는 Jira/Confluence 는 Atlassian 설정 파일을 외부 접근 가능한 주소로 바꾸고 DNS 업체에 해당 주소에 맞게 도메인만 물리고 포트 번호를 숨기지 않았다. 따라서, 포트번호 없이 기본 주소로 요청이 올 때도 Jira/Confluence 서비스인 것처럼 처리하기 위해 Apache VirtualHost 를 구성해서 리버스 프록시를 만들기로 했다."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://fedaeho.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Jira, Confluence 에 HTTPS 달기 - Apache Proxy 구성",
+      "item": "https://fedaeho.github.io/posts/2019-09-15-atlassian-proxy/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Jira, Confluence 에 HTTPS 달기 - Apache Proxy 구성",
+  "name": "Jira, Confluence 에 HTTPS 달기 - Apache Proxy 구성",
+  "description": "팀에서 운영하고 있는 Jira, Confluence 가 외부 접속이 가능함에도 불구하고 HTTPS 인증서가 설치되어 있지 않았다. 이외에도 보안상 취약점이 여럿 발견되었기에, Apache Proxy 설정 을 참고하여 설정하였다.\nVirtualHost 구성하기 팀에서 운영하는 Jira/Confluence 는 Atlassian 설정 파일을 외부 접근 가능한 주소로 바꾸고 DNS 업체에 해당 주소에 맞게 도메인만 물리고 포트 번호를 숨기지 않았다. 따라서, 포트번호 없이 기본 주소로 요청이 올 때도 Jira/Confluence 서비스인 것처럼 처리하기 위해 Apache VirtualHost 를 구성해서 리버스 프록시를 만들기로 했다.",
+  "keywords": [
+    "Apache", "Jira", "Confluence", "HTTPS"
+  ],
+  "articleBody": "팀에서 운영하고 있는 Jira, Confluence 가 외부 접속이 가능함에도 불구하고 HTTPS 인증서가 설치되어 있지 않았다. 이외에도 보안상 취약점이 여럿 발견되었기에, Apache Proxy 설정 을 참고하여 설정하였다.\nVirtualHost 구성하기 팀에서 운영하는 Jira/Confluence 는 Atlassian 설정 파일을 외부 접근 가능한 주소로 바꾸고 DNS 업체에 해당 주소에 맞게 도메인만 물리고 포트 번호를 숨기지 않았다. 따라서, 포트번호 없이 기본 주소로 요청이 올 때도 Jira/Confluence 서비스인 것처럼 처리하기 위해 Apache VirtualHost 를 구성해서 리버스 프록시를 만들기로 했다. (Nginx, Tomcat 도 가능하고 Jira/Confluence 역시 Tomcat 위에서 돌아가지만, Apache 가 가장 편했다.)\nAtlassian 홈페이지에서 다운로드한 Installer 를 그대로 따라서 설치하면 아래와 같은 포트로 설치된다.(Jira/Confluence 모두 동일한 서버에 설치했다.)\nService Name Address Default Port Jira jira.xxx.xxx 8080 Confluence wiki.xxx.xxx 8090 Apache VirtualHost 구성 (Apache 가 이미 설치되어 있다는 가정하에) ubuntu에서 /etc/apache2/sites-available 의 경로를 확인해보면 기본값으로 000-default.conf라는 파일이 보인다. 기본 설정 파일을 복사하여 Jira 와 Confluence(이하 Wiki) 각각에 맞게 다시 이름을 붙이고 아래와 같이 편집했다.\n001-jira.conf ",
+  "wordCount" : "987",
+  "inLanguage": "en",
+  "datePublished": "2019-09-15T00:00:00Z",
+  "dateModified": "2019-09-15T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://fedaeho.github.io/posts/2019-09-15-atlassian-proxy/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "fedaeho",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://fedaeho.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://fedaeho.github.io/" accesskey="h" title="fedaeho (Alt + H)">fedaeho</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://fedaeho.github.io/archives" title="Archive">
+                    <span>Archive</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://fedaeho.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://fedaeho.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      Jira, Confluence 에 HTTPS 달기 - Apache Proxy 구성
+    </h1>
+    <div class="post-meta"><span title='2019-09-15 00:00:00 +0000 UTC'>September 15, 2019</span>
+
+</div>
+  </header> 
+  <div class="post-content"><p>팀에서 운영하고 있는 Jira, Confluence 가 외부 접속이 가능함에도 불구하고 HTTPS 인증서가 설치되어 있지 않았다. 이외에도 보안상 취약점이 여럿 발견되었기에, <a href="https://www.digitalocean.com/community/tutorials/how-to-use-apache-as-a-reverse-proxy-with-mod_proxy-on-ubuntu-16-04">Apache Proxy 설정</a> 을 참고하여 설정하였다.</p>
+<h1 id="virtualhost-구성하기">VirtualHost 구성하기<a hidden class="anchor" aria-hidden="true" href="#virtualhost-구성하기">#</a></h1>
+<p>팀에서 운영하는 Jira/Confluence 는 Atlassian 설정 파일을 외부 접근 가능한 주소로 바꾸고 DNS 업체에 해당 주소에 맞게 도메인만 물리고 포트 번호를 숨기지 않았다. 따라서, 포트번호 없이 기본 주소로 요청이 올 때도 Jira/Confluence 서비스인 것처럼 처리하기 위해 Apache VirtualHost 를 구성해서 리버스 프록시를 만들기로 했다.
+(Nginx, Tomcat 도 가능하고 Jira/Confluence 역시 Tomcat 위에서 돌아가지만, Apache 가 가장 편했다.)</p>
+<p>Atlassian 홈페이지에서 다운로드한 Installer 를 그대로 따라서 설치하면 아래와 같은 포트로 설치된다.(Jira/Confluence 모두 동일한 서버에 설치했다.)</p>
+<table>
+<thead>
+<tr>
+<th>Service Name</th>
+<th>Address</th>
+<th>Default Port</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Jira</td>
+<td>jira.xxx.xxx</td>
+<td>8080</td>
+</tr>
+<tr>
+<td>Confluence</td>
+<td>wiki.xxx.xxx</td>
+<td>8090</td>
+</tr>
+</tbody>
+</table>
+<h2 id="apache-virtualhost-구성">Apache VirtualHost 구성<a hidden class="anchor" aria-hidden="true" href="#apache-virtualhost-구성">#</a></h2>
+<p>(Apache 가 이미 설치되어 있다는 가정하에) ubuntu에서 <code>/etc/apache2/sites-available</code> 의 경로를 확인해보면 기본값으로 <code>000-default.conf</code>라는 파일이 보인다. 기본 설정 파일을 복사하여 Jira 와 Confluence(이하 Wiki) 각각에 맞게 다시 이름을 붙이고 아래와 같이 편집했다.</p>
+<h3 id="001-jiraconf"><code>001-jira.conf</code><a hidden class="anchor" aria-hidden="true" href="#001-jiraconf">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-xml" data-lang="xml"><span style="display:flex;"><span><span style="color:#f92672">&lt;VirtualHost</span> <span style="color:#960050;background-color:#1e0010">*:80</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>        ServerName jira.xxx.xxx
+</span></span><span style="display:flex;"><span>        ServerAdmin jira@xxx.xxx
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;IfModule</span> <span style="color:#960050;background-color:#1e0010">mod_proxy.c</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>                ProxyRequests off
+</span></span><span style="display:flex;"><span>                ProxyVia off
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&lt;Proxy</span> <span style="color:#960050;background-color:#1e0010">*</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>                        Require all granted
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&lt;/Proxy&gt;</span>
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>                ProxyPass / http://localhost:8080/
+</span></span><span style="display:flex;"><span>                ProxyPassReverse / http://localhost:8080/
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;/IfModule&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;/VirtualHost&gt;</span>
+</span></span></code></pre></div><h3 id="002-wikiconf"><code>002-wiki.conf</code><a hidden class="anchor" aria-hidden="true" href="#002-wikiconf">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-xml" data-lang="xml"><span style="display:flex;"><span><span style="color:#f92672">&lt;VirtualHost</span> <span style="color:#960050;background-color:#1e0010">*:80</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>        ServerName wiki.xxx.xxx
+</span></span><span style="display:flex;"><span>        ServerAdmin wiki@xxx.xxx
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;IfModule</span> <span style="color:#960050;background-color:#1e0010">mod_proxy.c</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>                ProxyRequests off
+</span></span><span style="display:flex;"><span>                ProxyVia off
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&lt;Proxy</span> <span style="color:#960050;background-color:#1e0010">*</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>                        Require all granted
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&lt;/Proxy&gt;</span>
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>                ProxyPass / http://localhost:8090/
+</span></span><span style="display:flex;"><span>                ProxyPassReverse / http://localhost:8090/
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&lt;/IfModule&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;/VirtualHost&gt;</span>
+</span></span></code></pre></div><p>80번 포트로 들어오는 모든 요청에 대해, ServerName에 적힌 요청이 들어오면 해당 conf 파일이 이를 담당하여 전달한다.</p>
+<h2 id="mod-proxy-설정">Mod Proxy 설정<a hidden class="anchor" aria-hidden="true" href="#mod-proxy-설정">#</a></h2>
+<p>Apache 설치시에 proxy 설정을 할 수 있는 <code>mod_proxy</code> 모듈이 같이 설치가 되지만, 기본적으로 사용설정이 되어있지는 않기에 모듈을 키고 apache 를 재부팅해야 정상작동한다. 위에서 작성한 VirtualHost 설정 또한 추가 한뒤 reload 하자.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># apache 모듈 구동</span>
+</span></span><span style="display:flex;"><span>sudo a2enmod proxy
+</span></span><span style="display:flex;"><span>sudo a2enmod proxy_http
+</span></span><span style="display:flex;"><span>sudo a2enmod proxy_balancer
+</span></span><span style="display:flex;"><span>sudo a2enmod lbmethod_byrequests
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># VirtualHost 추가</span>
+</span></span><span style="display:flex;"><span>sudo a2ensite 001-jira
+</span></span><span style="display:flex;"><span>sudo a2ensite 002-wiki
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Apache Reload</span>
+</span></span><span style="display:flex;"><span>sudo service apache2 reload
+</span></span></code></pre></div><h1 id="프록시-연결-설정">프록시 연결 설정<a hidden class="anchor" aria-hidden="true" href="#프록시-연결-설정">#</a></h1>
+<p>Apache VirtualHost 만으로는 Jira/Wiki 가 정상적으로 Proxy 되지 않는다. 따라서 Atlassian 서비스들이 호출될 때 Proxy를 통해 불릴 수 있음을 알려야 한다.</p>
+<h2 id="atlassian-제품들의-proxy-설정">Atlassian 제품들의 Proxy 설정<a hidden class="anchor" aria-hidden="true" href="#atlassian-제품들의-proxy-설정">#</a></h2>
+<h3 id="confluence-설정-변경">Confluence 설정 변경<a hidden class="anchor" aria-hidden="true" href="#confluence-설정-변경">#</a></h3>
+<p>기본 설치를 한 경우 <code>/opt/atlassian/confluence/conf/server.xml</code>에서 서버 설정을 확인할 수 있다. 단순히 프록시만 연결하고자 하는 경우에는 아래의 내용을 설정파일에 추가(혹은 설정 파일 내부 주석 해제후 편집)하면 된다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-xml" data-lang="xml"><span style="display:flex;"><span><span style="color:#f92672">&lt;Connector</span> <span style="color:#a6e22e">port=</span><span style="color:#e6db74">&#34;8090&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">...</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">scheme=</span><span style="color:#e6db74">&#34;http&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">proxyName=</span><span style="color:#e6db74">&#34;wiki.xxx.xxx&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">proxyPort=</span><span style="color:#e6db74">&#34;80&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">...</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">/&gt;</span>
+</span></span></code></pre></div><p>이를 아래와 같이 변경하면, 기존처럼 포트를 직접 입력해서 접근하는 것을 막을 수 있다.(즉, wiki.xxx.xxx:8090 으로 접속하면 기존과 다르게 에러가 발생한다.) Proxy 하고자 하는 서버가 별도로 존재하는 경우 <code>address</code>를 해당 서버로 변경할 수도 있다. 이 설정은 Proxy 로 들어온 요청도 대응할 수 있게 만들어준다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-xml" data-lang="xml"><span style="display:flex;"><span><span style="color:#f92672">&lt;Connector</span> <span style="color:#a6e22e">port=</span><span style="color:#e6db74">&#34;8090&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">...</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">address=</span><span style="color:#e6db74">&#34;localhost&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">scheme=</span><span style="color:#e6db74">&#34;http&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">proxyName=</span><span style="color:#e6db74">&#34;wiki.xxx.xxx&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">proxyPort=</span><span style="color:#e6db74">&#34;80&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">...</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">/&gt;</span>
+</span></span></code></pre></div><h3 id="jira-설정-변경">Jira 설정 변경<a hidden class="anchor" aria-hidden="true" href="#jira-설정-변경">#</a></h3>
+<p>Jira 또한 <code>/opt/atlassian/jira/conf/server.xml</code>에 있는 설정파일을 변경하면 되지만, confluence 와 다르게 address 옵션을 설정하지 않았다. 따라서, 여전히 jira.xxx.xxx:8080 주소로 접속이 가능하다. (Jira 구조 상의 문제인지 다행히도(?) 로그인은 불가능하다.) 이는, Jira 에서 사용자를
+통합 관리하기 때문에, confluence 에서 Jira 서버를 볼 수 있어야 로그인이 가능하기 때문이다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-xml" data-lang="xml"><span style="display:flex;"><span><span style="color:#f92672">&lt;Connector</span> <span style="color:#a6e22e">port=</span><span style="color:#e6db74">&#34;8080&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">...</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">scheme=</span><span style="color:#e6db74">&#34;http&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">proxyName=</span><span style="color:#e6db74">&#34;jira.xxx.xxx&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">proxyPort=</span><span style="color:#e6db74">&#34;80&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#960050;background-color:#1e0010">...</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">/&gt;</span>
+</span></span></code></pre></div><h2 id="마무리">마무리<a hidden class="anchor" aria-hidden="true" href="#마무리">#</a></h2>
+<p>Atlassian 제품들을 모두 재시작 한다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo service confluence stop
+</span></span><span style="display:flex;"><span>sudo service jira stop
+</span></span><span style="display:flex;"><span>sudo service jira start
+</span></span><span style="display:flex;"><span>sudo service confluence start
+</span></span></code></pre></div><p>모든 설정이 끝난 후, 각 제품의 환경설정으로 가서 <strong>Base URL</strong>을 변경해주면 된다.</p>
+<h1 id="https-설정하기">HTTPS 설정하기<a hidden class="anchor" aria-hidden="true" href="#https-설정하기">#</a></h1>
+<h2 id="왜-https"><em>왜 HTTPS?</em><a hidden class="anchor" aria-hidden="true" href="#왜-https">#</a></h2>
+<p>최근에 사용하는 대부분의 브라우저는 https가 아니면 보안 경고를 보이면서 서비스를 제한한다. 이러한 서비스에 접속하는 경우 크롬 브라우저의 주소창 옆에 &ldquo;안전하지 않음(Not Secure)&rdquo; 이라는 문구가 항상 보이게 된다. 이는 클라이언트와 유저간에 전달되는 패킷이 암호화되지 않은 채로 전송되기 때문인데, 이 자체만으로 심각한 보안 문제를 야기하기는 어렵다. 그럼에도, HTTPS 연결은 패킷을 암호화하여 전달하므로 더욱 안전하며, 브라우저 주소창에 자물쇠와 함께 &ldquo;안전함&quot;이라는 마크를 확인할 수 있다.</p>
+<p>HTTPS를 쓰기 위해서는 SSL인증서를 받아야 하는데, 원개인 SSL이 아닌 Root CA 를 발급받기 위해서는 비싼 가격을 지불해야 했다. 하지만, 지금은 https
+보급을 위한 비영리 기관 <a href="https://letsencrypt.org/">Let&rsquo;s Encrypt</a>를 통해 무료로 발급 받을 수 있다.</p>
+<h2 id="certbot-사용하기">Certbot 사용하기<a hidden class="anchor" aria-hidden="true" href="#certbot-사용하기">#</a></h2>
+<blockquote>
+<p>VirtualHost 설정이 끝나있어야 한다.</p>
+</blockquote>
+<p>Let&rsquo;s encrypt에서는 certbot이라는 툴을 제공한다. <a href="https://certbot.eff.org/#ubuntuxenial-apache">여기</a>에서는 Certbot을 설치한다.</p>
+<p>Shell에서 아래와 같은 명령을 실행하면 절차에 따라 손쉽게 https를 발급 받을 수 있다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>sudo certbot --apache
+</span></span></code></pre></div><p>이 때, 설치 중간에 다음과 같은 스크립트가 나오면, 2를 선택하면 된다. 이 경우, http 로 접속하여도 자동으로 https 로 리다이렉트 해준다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>Please choose whether or not to redirect HTTP traffic to HTTPS, removing HTTP access.
+</span></span><span style="display:flex;"><span>- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+</span></span><span style="display:flex;"><span>1: No redirect - Make no further changes to the webserver configuration.
+</span></span><span style="display:flex;"><span>2: Redirect - Make all requests redirect to secure HTTPS access. Choose this <span style="color:#66d9ef">for</span>
+</span></span><span style="display:flex;"><span>new sites, or <span style="color:#66d9ef">if</span> you<span style="color:#e6db74">&#39;re confident your site works on HTTPS. You can undo this
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">change by editing your web server&#39;</span>s configuration.
+</span></span><span style="display:flex;"><span>- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+</span></span><span style="display:flex;"><span>Select the appropriate number <span style="color:#f92672">[</span>1-2<span style="color:#f92672">]</span> <span style="color:#66d9ef">then</span> <span style="color:#f92672">[</span>enter<span style="color:#f92672">]</span> <span style="color:#f92672">(</span>press <span style="color:#e6db74">&#39;c&#39;</span> to cancel<span style="color:#f92672">)</span>: <span style="color:#ae81ff">2</span>
+</span></span></code></pre></div><p>발급 완료 후 <code>/etc/apache2/sites-available</code> 혹은 <code>/etc/apache2/sites-enabled</code> 디렉토리에서 기존의 conf 를 열어보면 다음과 같은 스크립트가 추가적으로 붙은 것을 확인할 수 있다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-xml" data-lang="xml"><span style="display:flex;"><span>RewriteEngine on
+</span></span><span style="display:flex;"><span>RewriteCond %{SERVER_NAME} =wiki.xxx.xxx
+</span></span><span style="display:flex;"><span>RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+</span></span></code></pre></div><h2 id="jiraconfluence-https-프록시-연결">JIRA/Confluence HTTPS 프록시 연결<a hidden class="anchor" aria-hidden="true" href="#jiraconfluence-https-프록시-연결">#</a></h2>
+<p>다시 돌아와서, scheme, proxyPort를 https에 맞게 고쳐줘야한다. Proxy 연결 이전에 인증서를 사전발급 받을 수도 있으나, 프록시 설정 후 한번, 인증서 설치 후 두번 고치는 편이 디버깅에 훨씬 유리하다. 위에서 설정한 Confluence 설정으로 다시 돌아와서, scheme과 proxyPort를 HTTPS에 맞게 고쳐준다. (*HTTP 기본 포트는 <code>80</code>, HTTPS 기본 포트는 <code>443</code>이다.)</p>
+<h3 id="confluence">Confluence<a hidden class="anchor" aria-hidden="true" href="#confluence">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-xml" data-lang="xml"><span style="display:flex;"><span><span style="color:#f92672">&lt;Connector</span> <span style="color:#a6e22e">port=</span><span style="color:#e6db74">&#34;8090&#34;</span> <span style="color:#a6e22e">connectionTimeout=</span><span style="color:#e6db74">&#34;20000&#34;</span> <span style="color:#a6e22e">redirectPort=</span><span style="color:#e6db74">&#34;8443&#34;</span>
+</span></span><span style="display:flex;"><span>           <span style="color:#a6e22e">address=</span><span style="color:#e6db74">&#34;localhost&#34;</span> <span style="color:#a6e22e">maxThreads=</span><span style="color:#e6db74">&#34;48&#34;</span> <span style="color:#a6e22e">minSpareThreads=</span><span style="color:#e6db74">&#34;10&#34;</span>
+</span></span><span style="display:flex;"><span>           <span style="color:#a6e22e">enableLookups=</span><span style="color:#e6db74">&#34;false&#34;</span> <span style="color:#a6e22e">acceptCount=</span><span style="color:#e6db74">&#34;10&#34;</span> <span style="color:#a6e22e">debug=</span><span style="color:#e6db74">&#34;0&#34;</span> <span style="color:#a6e22e">URIEncoding=</span><span style="color:#e6db74">&#34;UTF-8&#34;</span>
+</span></span><span style="display:flex;"><span>           <span style="color:#a6e22e">protocol=</span><span style="color:#e6db74">&#34;org.apache.coyote.http11.Http11NioProtocol&#34;</span>
+</span></span><span style="display:flex;"><span>           <span style="color:#a6e22e">scheme=</span><span style="color:#e6db74">&#34;https&#34;</span> <span style="color:#a6e22e">secure=</span><span style="color:#e6db74">&#34;true&#34;</span> <span style="color:#a6e22e">proxyName=</span><span style="color:#e6db74">&#34;wiki.xxx.xxx&#34;</span> <span style="color:#a6e22e">proxyPort=</span><span style="color:#e6db74">&#34;443&#34;</span><span style="color:#f92672">/&gt;</span>
+</span></span></code></pre></div><h3 id="jira">Jira<a hidden class="anchor" aria-hidden="true" href="#jira">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-xml" data-lang="xml"><span style="display:flex;"><span><span style="color:#f92672">&lt;Connector</span> <span style="color:#a6e22e">port=</span><span style="color:#e6db74">&#34;8080&#34;</span> <span style="color:#a6e22e">relaxedPathChars=</span><span style="color:#e6db74">&#34;[]|&#34;</span> <span style="color:#a6e22e">relaxedQueryChars=</span><span style="color:#e6db74">&#34;[]|{}^\`&#34;</span><span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#f92672">&gt;</span>&#34;
+</span></span><span style="display:flex;"><span>           maxThreads=&#34;150&#34; minSpareThreads=&#34;25&#34; connectionTimeout=&#34;20000&#34; enableLookups=&#34;false&#34;
+</span></span><span style="display:flex;"><span>           maxHttpHeaderSize=&#34;8192&#34; protocol=&#34;HTTP/1.1&#34; useBodyEncodingForURI=&#34;true&#34; redirectPort=&#34;8443&#34;
+</span></span><span style="display:flex;"><span>           acceptCount=&#34;100&#34; disableUploadTimeout=&#34;true&#34; bindOnInit=&#34;false&#34; secure=&#34;true&#34; scheme=&#34;https&#34;
+</span></span><span style="display:flex;"><span>           proxyName=&#34;jira.xxx.xxx&#34; proxyPort=&#34;443&#34;/&gt;
+</span></span></code></pre></div><p>위에서와 마찬가지로 서비스를 재시작한 후 서비스 설정에서 다음 작업을 한다.</p>
+<ol>
+<li>&lsquo;서버&rsquo; 설정탭에서 <strong>Base URL</strong>들을 모두 https://&hellip;로 고쳐준다.</li>
+<li>**어플리케이션 연결(Application Link)**도 모두 무효화 된 상태이므로, 참조하여 모두 갱신한다.</li>
+</ol>
+<h3 id="추가---crontab을-이용한-인증서-자동갱신">추가 - crontab을 이용한 인증서 자동갱신<a hidden class="anchor" aria-hidden="true" href="#추가---crontab을-이용한-인증서-자동갱신">#</a></h3>
+<p>let&rsquo;s encrypt 로 발급받은 인증서의 유효기간은 3개월이다. 따라서, 정기적으로 인증서를 갱신해줄 필요가 있다. 제일 간편한 Crontab 을 사용하여 일정 주기마다 renew 스크립트를 실행하도록 설정했다. (아래의 경우, 매 1월 1시마다 인증서를 갱신하며, 아파치를 재실행해준다.)</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#ae81ff">0</span>  <span style="color:#ae81ff">1</span>    <span style="color:#ae81ff">1</span> * *   root    /usr/bin/certbot renew —quiet —renew-hook <span style="color:#e6db74">&#34;service apache2 reload&#34;</span>
+</span></span></code></pre></div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://fedaeho.github.io/tags/apache/">Apache</a></li>
+      <li><a href="https://fedaeho.github.io/tags/jira/">Jira</a></li>
+      <li><a href="https://fedaeho.github.io/tags/confluence/">Confluence</a></li>
+      <li><a href="https://fedaeho.github.io/tags/https/">HTTPS</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2022 <a href="https://fedaeho.github.io/">fedaeho</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

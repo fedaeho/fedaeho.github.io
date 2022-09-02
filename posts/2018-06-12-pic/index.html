@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>PIC | fedaeho</title>
+<meta name="keywords" content="PIC">
+<meta name="description" content="Particle-based simulation of plasmas 1. Types of interacting systems 1.1 weakly/stronly interacting system Consider a system
+Collection of charged ptcls. in a box box with the side of the $\lambda_D$ measure E-field at local pt. Strongly coupled system
+If few particles exist,measurement would be very jumpy. As a ptcl passes by the detector, the measurement detects a jump up. When a ptcl moves away it detects a jump down. On avg, at any give time, very few ptcls are near the detector.">
+<meta name="author" content="">
+<link rel="canonical" href="https://fedaeho.github.io/posts/2018-06-12-pic/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.bc1149f4a72aa4858d3a9f71462f75e5884ffe8073ea9d6d5761d5663d651e20.css" integrity="sha256-vBFJ9KcqpIWNOp9xRi915YhP/oBz6p1tV2HVZj1lHiA=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://fedaeho.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://fedaeho.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://fedaeho.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://fedaeho.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://fedaeho.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+          
+          
+          delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+              {left: '\\(', right: '\\)', display: true},
+              {left: '\\[', right: '\\]', display: false}
+          ],
+          
+          throwOnError : false
+        });
+    });
+</script>
+
+
+<meta property="og:title" content="PIC" />
+<meta property="og:description" content="Particle-based simulation of plasmas 1. Types of interacting systems 1.1 weakly/stronly interacting system Consider a system
+Collection of charged ptcls. in a box box with the side of the $\lambda_D$ measure E-field at local pt. Strongly coupled system
+If few particles exist,measurement would be very jumpy. As a ptcl passes by the detector, the measurement detects a jump up. When a ptcl moves away it detects a jump down. On avg, at any give time, very few ptcls are near the detector." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedaeho.github.io/posts/2018-06-12-pic/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2018-06-12T00:00:00&#43;00:00" />
+<meta property="article:modified_time" content="2018-06-12T00:00:00&#43;00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="PIC"/>
+<meta name="twitter:description" content="Particle-based simulation of plasmas 1. Types of interacting systems 1.1 weakly/stronly interacting system Consider a system
+Collection of charged ptcls. in a box box with the side of the $\lambda_D$ measure E-field at local pt. Strongly coupled system
+If few particles exist,measurement would be very jumpy. As a ptcl passes by the detector, the measurement detects a jump up. When a ptcl moves away it detects a jump down. On avg, at any give time, very few ptcls are near the detector."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://fedaeho.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "PIC",
+      "item": "https://fedaeho.github.io/posts/2018-06-12-pic/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "PIC",
+  "name": "PIC",
+  "description": "Particle-based simulation of plasmas 1. Types of interacting systems 1.1 weakly/stronly interacting system Consider a system\nCollection of charged ptcls. in a box box with the side of the $\\lambda_D$ measure E-field at local pt. Strongly coupled system\nIf few particles exist,measurement would be very jumpy. As a ptcl passes by the detector, the measurement detects a jump up. When a ptcl moves away it detects a jump down. On avg, at any give time, very few ptcls are near the detector.",
+  "keywords": [
+    "PIC"
+  ],
+  "articleBody": "Particle-based simulation of plasmas 1. Types of interacting systems 1.1 weakly/stronly interacting system Consider a system\nCollection of charged ptcls. in a box box with the side of the $\\lambda_D$ measure E-field at local pt. Strongly coupled system\nIf few particles exist,measurement would be very jumpy. As a ptcl passes by the detector, the measurement detects a jump up. When a ptcl moves away it detects a jump down. On avg, at any give time, very few ptcls are near the detector. Their positions determine the value measured. evolution is determined by the close encounters and by the relative configuration of any two pairs of particles. characteristic feature : presence of a succession of collision. Weakly coupled system\nFor many ptcls, At any given pt., # of ptcls. contributing to the E-field. “Regardeless of the ptcl motion”, field is given. Effects of all ptcls. averaged, steady measurement. smooth trajectories characteristic feature : “mean field” 1.2 Strength of interaction number of particles in debye sphere : $N_D = n \\lambda_D^3$ Large : strongly coupled small : weakly coupled On avg., volume associated with each ptcl : $V_p = n^{-1} -\u003eavg. interparticle distance $a=V_p^{1/3}\\equiv n^{-1/3}$ Electrostatic potential : $E_{pot}=\\frac{q^2}{4\\pi \\varepsilon_0 a}$ (assume equal charge) K.E. , of the order of thermal E : $E_{th}=kT$ Plasma coupling parameter : $\\Gamma=\\frac{E_{pot}}{E_{th}}=\\frac{q^2}{4\\pi \\varepsilon_0 a kT}\\equiv \\frac{1}{4\\pi N_D^{2/3}}$ When $N_D \\uparrow$, $\\Gamma \\downarrow $ : K.E \u003e P.E : weakly coupled system When $N_E \\downarrow$, $\\Gamma \\uparrow$ : K.E \u003c P.E : strongly coupled system 2. Computer simulation of interacting systems PP(particle-particle) approach PIC (Particle In Cell method) (or, Pm : Particle-Mesh) simply following each ptcl. in the system reduce the description to a “statistical sample of particles” N particles with N eq. of motion superparticle : collective clouds of particles strongly coupled system weakly coupled system 3. PIC method kinetic description of a plasma EM field \u0026 dist. fcn. $f_s(\\vec{x},\\vec{v},t)$ : dist fcn. no. of ptcl at time t in the infinitesimal space of $(d\\vec{x},d\\vec{v})$ around $(\\vec{x},\\vec{v})$ prob. of ptcl. in phase-space Start from “Boltzmann eq” $$ \\frac{\\partial f_s}{\\partial t} + \\vec{v}\\cdot\\frac{\\partial f_s}{\\partial \\vec{x}}+\\frac{q_s}{m_s}(\\vec{E}+\\vec{v}\\times\\vec{B})\\cdot\\frac{\\partial f_s}{\\partial \\vec{v}}=\\left[ \\frac{\\partial f_s}{\\partial t} \\right]_{coll} $$\nEM field from 2 curl eq. $$ \\begin{align} \u0026\\nabla\\times\\vec{E}=-\\frac{\\partial \\vec{B}}{\\partial t} \\ \u0026\\nabla \\times \\vec{B}=\\mu_0 \\varepsilon_0 \\frac{\\partial \\vec{E}}{\\partial t} + \\mu_0 \\vec{J} \\end{align} $$\n$\\rho(\\vec{x},t)=\\sum_s q_s \\int f_s(\\vec{x},\\vec{v},t)d\\vec{v}$ $\\vec{J}(\\vec{x},t)=\\sum_s q_s \\int \\vec{v}f_s(\\vec{x},\\vec{v},t)d\\vec{v}$ 3.1 Mathematical Formulation of PIC PIC : representation of the dist fcn. of each species by a superposition of moving elements\nAssume dist. fcn. of each species $s$ is given by the superposition of computational particles\n$$ f_s(\\vec{x},\\vec{v},t)=\\sum_p f_p(\\vec{x},\\vec{v},t) $$\nassigning a specific fcn. form for dist. of computational ptcl, for solving Vlasov eq.\nStandard PIC\n2 free parameter for each spatial dim. position and velocity More advanced\n+evolving shape of the super ptcl Standard PIC\nTensor product of the shape in each direction of phase space $$ f_p(\\vec{x},\\vec{v},t)=N_pS_{\\vec{x}}(\\vec{x}-\\vec{x_p}(t))S_{\\vec{v}}(\\vec{v}-\\vec{v_p}(t)) $$ $S_{\\vec{x}}$, $S_{\\vec{v}}$ : shape fcn. $N_p$ : no. of physical ptcls in the superparticle Shape fcn.\nsupport is compact (closed and bounded : 0 outside, small range in phase space) normalization $$ \\int S_{\\xi} (\\xi-\\xi_p)d\\xi = 1 $$ (not necessary) suggests to choose symmetric shape $$ S_\\xi(\\xi-\\xi_p)=S_\\xi(\\xi_p-\\xi) $$ 3.2. Selection of the ptcl shape For the velocity, PIC generally assume dirac-delta $$ S_{\\vec{v}}(\\vec{v}-\\vec{v_p})=\\delta(v_x-v_{xp})\\delta(v_y-v_{yp})\\delta(v_z-v_{zp}) $$ all ptcls in the superparticle has same velocity -\u003e remain closer in phase space during evolution commonly used shape fcn. : based on b-splines 1st b-spline : flat-top fcn. $$ b_0(\\xi)=\\begin{cases} 1 \u0026 |\\xi|\u003c1/2 \\ 0 \u0026 otherwise\\end {cases} $$ subsequent b-splines : successive integration $$ b_l(\\xi)=\\int_{-\\infty}^{\\infty} d\\xi’ b_0(\\xi-\\xi’)b_{l-1}(\\xi’) $$ properties sum over all pts of b-spline on a step 1 uniform grid is 1, regardless shifting $$ \\sum_i b_l(\\xi+i)=1 $$ normalization $$ \\int_{-\\infty}^{\\infty}b_l(\\xi)d\\xi=1 $$ $\\delta(\\xi)=b_{-1}(\\xi)$ shape fcn. base on b-splines in PIC methods $$ S_{\\vec{x}}(\\vec{x}-\\vec{x_p})=\\frac{1}{\\Delta x_p \\Delta y_p \\Delta z_p} b_l \\left(\\frac{x-x_p}{\\Delta x_p}\\right) b_l \\left(\\frac{y-y_p}{\\Delta y_p}\\right) b_l \\left(\\frac{z-z_p}{\\Delta z_p}\\right) $$ common choice : order 0 : uniform square clound in cell 4. PIC simulation Simplest case : 1D and electrostatic Electrons being followed as particles but ions forming a fixed background of uniform density. This is justified by the heavy mass of the ions. 4.1 Initialization Setting up jupyter notebook environment Import some python library Initialize definition of the simulation Discretize in terms of domain size and of the grid Set time step with the number of cycles to be run Define Plasma density Here use normalized units : plasma freq is unitary Charge neutral : The ion uniform background is set to exactly balance the charge of the particles from IPython.core.interactiveshell import InteractiveShell InteractiveShell.ast_node_interactivity = \"all\" # 'all' | 'last' | 'last_expr' | 'none' %config InlineBackend.figure_format = 'retina' from IPython.display import HTML import numpy as np import pandas as pd from scipy import sparse from scipy.sparse import linalg import matplotlib.pyplot as plt from matplotlib.animation import FuncAnimation, FFMpegFileWriter # Simulation parameters L = 10*np.pi # Domain size N = NG * 200 # Number of particles (200 per cell for example) dx = L / NG # Cell size WP = 1. # Plasma frequency QM = -1. # Charge/mass ratio Q = WP**2 / (QM*N/L) # rho0*L/N: charge carried by a single particle rho_back = -Q*N/L # Background charge density 4.2 Particle Initialization Example : two-stream instability\ntwo equal beams of initial electrons opposite mean velocity but equal density and thermal speed We can add perturbation to excite the desired mode (of sine function)\n#Particle initial properties V0 = 0.2 # Stream velocity VT = 0.0000001 # Thermal speed # perturbation XP1 = 1.0 mode = 1 # particles (electrons) xp = np.linspace(0, L-L/N, N).T # Particle positions vp = VT * np.random.randn(N) # Particle momentum, initially Maxwellian pm = np.arange(N) pm = 1 - 2 * np.mod(pm+1, 2) # Even and odd particles have opposite speed vp += pm * V0 # Momentum + stream velocity np.random.shuffle(vp) # We reshuffle the indices to avoid any bias # Add electron perturbation to excite the desired mode xp += XP1 * (L/N) * np.sin(2 * np.pi * xp / L * mode) xp[np.where(xp \u003c 0)] += L xp[np.where(xp \u003e= L)] -= L 4.3 Grid Initialization In the 1D electrostatic limit, the Maxwell equations reduce to just the Poisson equation:\n$$ -\\varepsilon_0 \\nabla^2 \\phi = e(n_i - n_e) $$\n$n_i$ : uniform background ion density $n_e$ : the electron density projected to the grid from the particles Discretize laplacian using simple finite difference method $$ -\\varepsilon_0 (\\phi_{i+1} + \\phi_{i-1} - 2\\phi_i) = e(n_i-n_e)\\Delta_x^2 $$\nThe potential is computed in the cell centres.\nThe continuum is subdivided in cells indexed by $i \\in [0, NG-1]$\nBoundary condition\nPeriodic boundary Potential is defined as a negative constant potential in the last cell is 0 The number of unknown potentials then is just NG-1. Resulting matrix : -2 on the diagonal \u0026 1 on the neighbouring diagonal # Auxiliary vectors p = np.concatenate([np.arange(N), np.arange(N)]) # Particle indices up to N Poisson = sparse.spdiags(([1, -2, 1] * np.ones((1, NG-1), dtype=int).T).T, [-1, 0, 1], NG-1, NG-1) Poisson = Poisson.tocsc() 4.4 Main Cycle Four steps for each cycle Advance the position Compute the density from projected particle to the grid Solve Poission equation Compute electric field \u0026 force Advance the particle velocity def cycle(xp,vp): # update particle position xp xp += vp * DT # Periodic boundary condition xp[np.where(xp \u003c 0)] += L xp[np.where(xp \u003e= L)] -= L # Project particles-\u003egrid csi = xp/dx g1 = np.floor(csi - 0.5) # Distance from the centre of the cell g = np.concatenate((g1, g1+1)) fraz1 = 1 - np.abs(xp/dx - g1 - 0.5) fraz = np.concatenate((fraz1, 1-fraz1)) g[np.where(g \u003c 0)] += NG g[np.where(g \u003e NG-1)] -= NG mat = sparse.csc_matrix((fraz, (p, g)), shape=(N, NG)) rho = Q / dx * mat.toarray().sum(axis=0) + rho_back # Compute electric field potential Phi = linalg.spsolve(Poisson, -dx**2 * rho[0:NG-1]) Phi = np.concatenate((Phi,[0])) # Electric field on the grid Eg = (np.roll(Phi, 1) - np.roll(Phi, -1)) / (2*dx) # interpolation grid-\u003eparticle and velocity update vp += mat * QM * Eg * DT 4.5 Diagnostics Particle diagnostics\nPhase space plot : $x_p vs. v_p$ Velocity Distribution function : histogram of particle counts in energy bins Field diagnostics\nElectric filed on the grid vs. time FFT modes of the filed quantites Other information\nTotal Kinetic Energy : $E_k = \\frac{1}{2} \\sum_p m_p v_p^2$ Total Momentum : $P = \\sum_p m_p v_p$ Total Energy of the field : $E_E = \\Delta x \\sum_c \\frac{\\varepsilon_0 E^2}{2} \\equiv \\Delta x \\sum_c \\frac{\\rho \\phi}{2}$ # Preparation for phase space plot fig = plt.figure() ax = plt.axes(xlim=(0, 30), ylim=(-3, 3)) line, = ax.plot([], [], lw=2) plt.xlabel('x') plt.ylabel('velocity') plotlays, plotcols = [2], [\"blue\",\"red\"] lines = [] for index in range(2): lobj = ax.plot([],[],'.',lw=2,color=plotcols[index])[0] lines.append(lobj) # initialization function: plot the background of each frame def init(): for line in lines: line.set_data([],[]) return lines adr1=np.where(vp\u003e=0) adr2=np.where(vp\u003c0) x1,y1 = [],[] x2,y2 = [],[] def updatefig(*args): cycle(xp,vp) xlist=[xp[adr1], xp[adr2]] ylist=[vp[adr1], vp[adr2]] #for index in range(0,1): for lnum,line in enumerate(lines): line.set_data(xlist[lnum], ylist[lnum]) # set data for each line separately. return lines anim = FuncAnimation(fig, updatefig, init_func=init, frames=NT, interval=1, blit=True) HTML(anim.to_jshtml()) ",
+  "wordCount" : "1505",
+  "inLanguage": "en",
+  "datePublished": "2018-06-12T00:00:00Z",
+  "dateModified": "2018-06-12T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://fedaeho.github.io/posts/2018-06-12-pic/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "fedaeho",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://fedaeho.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://fedaeho.github.io/" accesskey="h" title="fedaeho (Alt + H)">fedaeho</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://fedaeho.github.io/archives" title="Archive">
+                    <span>Archive</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://fedaeho.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://fedaeho.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      PIC
+    </h1>
+    <div class="post-meta"><span title='2018-06-12 00:00:00 +0000 UTC'>June 12, 2018</span>
+
+</div>
+  </header> 
+  <div class="post-content"><h1 id="particle-based-simulation-of-plasmas">Particle-based simulation of plasmas<a hidden class="anchor" aria-hidden="true" href="#particle-based-simulation-of-plasmas">#</a></h1>
+<h2 id="1-types-of-interacting-systems">1. Types of interacting systems<a hidden class="anchor" aria-hidden="true" href="#1-types-of-interacting-systems">#</a></h2>
+<h3 id="11-weaklystronly-interacting-system">1.1 weakly/stronly interacting system<a hidden class="anchor" aria-hidden="true" href="#11-weaklystronly-interacting-system">#</a></h3>
+<ul>
+<li>
+<p>Consider a system</p>
+<ul>
+<li>Collection of charged ptcls. in a box</li>
+<li>box with the side of the $\lambda_D$</li>
+<li>measure E-field at local pt.</li>
+</ul>
+</li>
+<li>
+<p>Strongly coupled system</p>
+<ul>
+<li>If few particles exist,measurement would be very jumpy.
+<ul>
+<li>As a ptcl passes by the detector, the measurement detects a jump up.</li>
+<li>When a ptcl moves away it detects a jump down.</li>
+<li>On avg, at any give time, very few ptcls are near the detector. Their positions determine the value measured.</li>
+<li>evolution is determined by the close encounters and by the relative configuration of any two pairs of particles.</li>
+</ul>
+</li>
+<li>characteristic feature : presence of a succession of collision.</li>
+</ul>
+</li>
+<li>
+<p>Weakly coupled system</p>
+<ul>
+<li>For many ptcls, At any given pt., # of ptcls. contributing to the E-field.
+<ul>
+<li>&ldquo;Regardeless of the ptcl motion&rdquo;, field is given.</li>
+<li>Effects of all ptcls. averaged, steady measurement.</li>
+<li>smooth trajectories</li>
+</ul>
+</li>
+<li>characteristic feature : &ldquo;mean field&rdquo;</li>
+</ul>
+</li>
+</ul>
+<h3 id="12-strength-of-interaction">1.2 Strength of interaction<a hidden class="anchor" aria-hidden="true" href="#12-strength-of-interaction">#</a></h3>
+<ul>
+<li>number of particles in debye sphere : $N_D = n \lambda_D^3$
+<ul>
+<li>Large : strongly coupled</li>
+<li>small : weakly coupled</li>
+</ul>
+</li>
+<li>On avg., volume associated with each ptcl : $V_p = n^{-1}
+<ul>
+<li>-&gt;avg. interparticle distance $a=V_p^{1/3}\equiv n^{-1/3}$</li>
+</ul>
+</li>
+<li>Electrostatic potential :  $E_{pot}=\frac{q^2}{4\pi \varepsilon_0 a}$ (assume equal charge)</li>
+<li>K.E. , of the order of thermal E : $E_{th}=kT$</li>
+<li>Plasma coupling parameter : $\Gamma=\frac{E_{pot}}{E_{th}}=\frac{q^2}{4\pi \varepsilon_0 a kT}\equiv \frac{1}{4\pi N_D^{2/3}}$
+<ul>
+<li>When $N_D \uparrow$, $\Gamma \downarrow $ : K.E &gt; P.E : weakly coupled system</li>
+<li>When $N_E \downarrow$, $\Gamma \uparrow$ : K.E &lt; P.E : strongly coupled system</li>
+</ul>
+</li>
+</ul>
+<h2 id="2-computer-simulation-of-interacting-systems">2. Computer simulation of interacting systems<a hidden class="anchor" aria-hidden="true" href="#2-computer-simulation-of-interacting-systems">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>PP(particle-particle) approach</th>
+<th>PIC (Particle In Cell method) (or, Pm : Particle-Mesh)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>simply following each ptcl. in the system</td>
+<td>reduce the description to a &ldquo;statistical sample of particles&rdquo;</td>
+</tr>
+<tr>
+<td>N particles with N eq. of motion</td>
+<td>superparticle : collective clouds of particles</td>
+</tr>
+<tr>
+<td>strongly coupled system</td>
+<td>weakly coupled system</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-pic-method">3. PIC method<a hidden class="anchor" aria-hidden="true" href="#3-pic-method">#</a></h2>
+<ul>
+<li>kinetic description of a plasma
+<ul>
+<li>EM field &amp; dist. fcn.</li>
+</ul>
+</li>
+<li>$f_s(\vec{x},\vec{v},t)$ : dist fcn.
+<ul>
+<li>no. of ptcl at time t in the infinitesimal space of $(d\vec{x},d\vec{v})$ around $(\vec{x},\vec{v})$</li>
+<li>prob. of ptcl. in phase-space</li>
+</ul>
+</li>
+<li>Start from &ldquo;Boltzmann eq&rdquo;</li>
+</ul>
+<p>$$
+\frac{\partial f_s}{\partial t} + \vec{v}\cdot\frac{\partial f_s}{\partial \vec{x}}+\frac{q_s}{m_s}(\vec{E}+\vec{v}\times\vec{B})\cdot\frac{\partial f_s}{\partial \vec{v}}=\left[ \frac{\partial f_s}{\partial t}  \right]_{coll}
+$$</p>
+<ul>
+<li>EM field from 2 curl eq.</li>
+</ul>
+<p>$$
+\begin{align}
+&amp;\nabla\times\vec{E}=-\frac{\partial \vec{B}}{\partial t} \
+&amp;\nabla \times \vec{B}=\mu_0 \varepsilon_0 \frac{\partial \vec{E}}{\partial t} + \mu_0 \vec{J}
+\end{align}
+$$</p>
+<ul>
+<li>$\rho(\vec{x},t)=\sum_s q_s \int f_s(\vec{x},\vec{v},t)d\vec{v}$</li>
+<li>$\vec{J}(\vec{x},t)=\sum_s q_s \int \vec{v}f_s(\vec{x},\vec{v},t)d\vec{v}$</li>
+</ul>
+<h3 id="31-mathematical-formulation-of-pic">3.1 Mathematical Formulation of PIC<a hidden class="anchor" aria-hidden="true" href="#31-mathematical-formulation-of-pic">#</a></h3>
+<ul>
+<li>
+<p>PIC : representation of the dist fcn. of each species by a superposition of moving elements</p>
+</li>
+<li>
+<p>Assume dist. fcn. of each species $s$ is given by the superposition of computational particles</p>
+</li>
+<li>
+<p>$$
+f_s(\vec{x},\vec{v},t)=\sum_p f_p(\vec{x},\vec{v},t)
+$$</p>
+</li>
+<li>
+<p>assigning a specific fcn. form for dist. of computational ptcl, for solving Vlasov eq.</p>
+</li>
+<li>
+<p>Standard PIC</p>
+<ul>
+<li>2 free parameter for each spatial dim.</li>
+<li>position and velocity</li>
+</ul>
+</li>
+<li>
+<p>More advanced</p>
+<ul>
+<li>+evolving shape of the super ptcl</li>
+</ul>
+</li>
+<li>
+<p>Standard PIC</p>
+<ul>
+<li>Tensor product of the shape in each direction of phase space</li>
+<li>$$
+f_p(\vec{x},\vec{v},t)=N_pS_{\vec{x}}(\vec{x}-\vec{x_p}(t))S_{\vec{v}}(\vec{v}-\vec{v_p}(t))
+$$
+<ul>
+<li>$S_{\vec{x}}$, $S_{\vec{v}}$ : shape fcn.</li>
+<li>$N_p$ : no. of physical ptcls in the superparticle</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Shape fcn.</p>
+<ol>
+<li>support is compact (closed and bounded : 0 outside, small range in phase space)</li>
+<li>normalization
+$$
+\int S_{\xi} (\xi-\xi_p)d\xi = 1
+$$</li>
+<li>(not necessary) suggests to choose symmetric shape
+$$
+S_\xi(\xi-\xi_p)=S_\xi(\xi_p-\xi)
+$$</li>
+</ol>
+</li>
+</ul>
+<h3 id="32-selection-of-the-ptcl-shape">3.2. Selection of the ptcl shape<a hidden class="anchor" aria-hidden="true" href="#32-selection-of-the-ptcl-shape">#</a></h3>
+<ul>
+<li>For the velocity, PIC generally assume dirac-delta
+<ul>
+<li>$$
+S_{\vec{v}}(\vec{v}-\vec{v_p})=\delta(v_x-v_{xp})\delta(v_y-v_{yp})\delta(v_z-v_{zp})
+$$</li>
+<li>all ptcls in the superparticle has same velocity -&gt; remain closer in phase space during evolution</li>
+</ul>
+</li>
+<li>commonly used shape fcn. : based on b-splines
+<ul>
+<li>1st b-spline : flat-top fcn.
+<ul>
+<li>$$
+b_0(\xi)=\begin{cases} 1 &amp; |\xi|&lt;1/2 \ 0 &amp; otherwise\end {cases}
+$$</li>
+</ul>
+</li>
+<li>subsequent b-splines : successive integration
+$$
+b_l(\xi)=\int_{-\infty}^{\infty} d\xi&rsquo; b_0(\xi-\xi&rsquo;)b_{l-1}(\xi&rsquo;)
+$$</li>
+<li>properties
+<ol>
+<li>sum over all pts of b-spline on a step 1 uniform grid is 1, regardless shifting
+$$
+\sum_i b_l(\xi+i)=1
+$$</li>
+<li>normalization
+$$
+\int_{-\infty}^{\infty}b_l(\xi)d\xi=1
+$$</li>
+<li>$\delta(\xi)=b_{-1}(\xi)$</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>shape fcn. base on b-splines in PIC methods
+$$
+S_{\vec{x}}(\vec{x}-\vec{x_p})=\frac{1}{\Delta x_p \Delta y_p \Delta z_p} b_l \left(\frac{x-x_p}{\Delta x_p}\right)
+b_l \left(\frac{y-y_p}{\Delta y_p}\right)
+b_l \left(\frac{z-z_p}{\Delta z_p}\right)
+$$
+<ul>
+<li>common choice : order 0 : uniform square clound in cell</li>
+</ul>
+</li>
+</ul>
+<h2 id="4-pic-simulation">4. PIC simulation<a hidden class="anchor" aria-hidden="true" href="#4-pic-simulation">#</a></h2>
+<ul>
+<li>Simplest case : 1D and electrostatic</li>
+<li>Electrons being followed as particles but ions forming a fixed background of uniform density.
+<ul>
+<li>This is justified by the heavy mass of the ions.</li>
+</ul>
+</li>
+</ul>
+<h3 id="41-initialization">4.1 Initialization<a hidden class="anchor" aria-hidden="true" href="#41-initialization">#</a></h3>
+<ol>
+<li>Setting up jupyter notebook environment</li>
+<li>Import some python library</li>
+<li>Initialize definition of the simulation
+<ul>
+<li>Discretize in terms of domain size and of the grid</li>
+<li>Set time step with the number of cycles to be run</li>
+<li>Define Plasma density
+<ul>
+<li>Here use normalized units : plasma freq is unitary</li>
+</ul>
+</li>
+<li>Charge neutral : The ion uniform background is set to exactly balance the charge of the particles</li>
+</ul>
+</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> IPython.core.interactiveshell <span style="color:#f92672">import</span> InteractiveShell
+</span></span><span style="display:flex;"><span>InteractiveShell<span style="color:#f92672">.</span>ast_node_interactivity <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;all&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#  &#39;all&#39; | &#39;last&#39; | &#39;last_expr&#39; | &#39;none&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">%</span>config InlineBackend<span style="color:#f92672">.</span>figure_format <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;retina&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> IPython.display <span style="color:#f92672">import</span> HTML
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> pandas <span style="color:#66d9ef">as</span> pd
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> scipy <span style="color:#f92672">import</span> sparse
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> scipy.sparse <span style="color:#f92672">import</span> linalg
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> matplotlib.pyplot <span style="color:#66d9ef">as</span> plt
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> matplotlib.animation <span style="color:#f92672">import</span> FuncAnimation, FFMpegFileWriter
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Simulation parameters</span>
+</span></span><span style="display:flex;"><span>L <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span><span style="color:#f92672">*</span>np<span style="color:#f92672">.</span>pi <span style="color:#75715e"># Domain size</span>
+</span></span><span style="display:flex;"><span>N <span style="color:#f92672">=</span> NG <span style="color:#f92672">*</span> <span style="color:#ae81ff">200</span> <span style="color:#75715e"># Number of particles (200 per cell for example)</span>
+</span></span><span style="display:flex;"><span>dx <span style="color:#f92672">=</span> L <span style="color:#f92672">/</span> NG <span style="color:#75715e"># Cell size</span>
+</span></span><span style="display:flex;"><span>WP <span style="color:#f92672">=</span> <span style="color:#ae81ff">1.</span> <span style="color:#75715e"># Plasma frequency</span>
+</span></span><span style="display:flex;"><span>QM <span style="color:#f92672">=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1.</span> <span style="color:#75715e"># Charge/mass ratio</span>
+</span></span><span style="display:flex;"><span>Q <span style="color:#f92672">=</span> WP<span style="color:#f92672">**</span><span style="color:#ae81ff">2</span> <span style="color:#f92672">/</span> (QM<span style="color:#f92672">*</span>N<span style="color:#f92672">/</span>L) <span style="color:#75715e"># rho0*L/N: charge carried by a single particle</span>
+</span></span><span style="display:flex;"><span>rho_back <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>Q<span style="color:#f92672">*</span>N<span style="color:#f92672">/</span>L <span style="color:#75715e"># Background charge density</span>
+</span></span></code></pre></div><h3 id="42-particle-initialization">4.2 Particle Initialization<a hidden class="anchor" aria-hidden="true" href="#42-particle-initialization">#</a></h3>
+<ul>
+<li>
+<p>Example : two-stream instability</p>
+<ul>
+<li>two equal beams of initial electrons</li>
+<li>opposite mean velocity but equal density and thermal speed</li>
+</ul>
+</li>
+<li>
+<p>We can add perturbation to excite the desired mode (of sine function)</p>
+</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e">#Particle initial properties</span>
+</span></span><span style="display:flex;"><span>V0 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.2</span> <span style="color:#75715e"># Stream velocity</span>
+</span></span><span style="display:flex;"><span>VT <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.0000001</span> <span style="color:#75715e"># Thermal speed</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># perturbation</span>
+</span></span><span style="display:flex;"><span>XP1 <span style="color:#f92672">=</span> <span style="color:#ae81ff">1.0</span>
+</span></span><span style="display:flex;"><span>mode <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># particles (electrons)</span>
+</span></span><span style="display:flex;"><span>xp <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>linspace(<span style="color:#ae81ff">0</span>, L<span style="color:#f92672">-</span>L<span style="color:#f92672">/</span>N, N)<span style="color:#f92672">.</span>T <span style="color:#75715e"># Particle positions</span>
+</span></span><span style="display:flex;"><span>vp <span style="color:#f92672">=</span> VT <span style="color:#f92672">*</span> np<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>randn(N) <span style="color:#75715e"># Particle momentum, initially Maxwellian</span>
+</span></span><span style="display:flex;"><span>pm <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>arange(N)
+</span></span><span style="display:flex;"><span>pm <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> np<span style="color:#f92672">.</span>mod(pm<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>) <span style="color:#75715e"># Even and odd particles have opposite speed</span>
+</span></span><span style="display:flex;"><span>vp <span style="color:#f92672">+=</span> pm <span style="color:#f92672">*</span> V0 <span style="color:#75715e"># Momentum + stream velocity</span>
+</span></span><span style="display:flex;"><span>np<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>shuffle(vp) <span style="color:#75715e"># We reshuffle the indices to avoid any bias</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Add electron perturbation to excite the desired mode</span>
+</span></span><span style="display:flex;"><span>xp <span style="color:#f92672">+=</span> XP1 <span style="color:#f92672">*</span> (L<span style="color:#f92672">/</span>N) <span style="color:#f92672">*</span> np<span style="color:#f92672">.</span>sin(<span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> np<span style="color:#f92672">.</span>pi <span style="color:#f92672">*</span> xp <span style="color:#f92672">/</span> L <span style="color:#f92672">*</span> mode)
+</span></span><span style="display:flex;"><span>xp[np<span style="color:#f92672">.</span>where(xp <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>)] <span style="color:#f92672">+=</span> L
+</span></span><span style="display:flex;"><span>xp[np<span style="color:#f92672">.</span>where(xp <span style="color:#f92672">&gt;=</span> L)] <span style="color:#f92672">-=</span> L
+</span></span></code></pre></div><h3 id="43-grid-initialization">4.3 Grid Initialization<a hidden class="anchor" aria-hidden="true" href="#43-grid-initialization">#</a></h3>
+<ul>
+<li>
+<p>In the 1D electrostatic limit, the Maxwell equations reduce to just the Poisson equation:</p>
+<p>$$
+-\varepsilon_0 \nabla^2 \phi = e(n_i - n_e)
+$$</p>
+<ul>
+<li>$n_i$ : uniform background ion density</li>
+<li>$n_e$ : the electron density projected to the grid from the particles</li>
+</ul>
+</li>
+<li>
+<p>Discretize laplacian using simple finite difference method
+$$
+-\varepsilon_0 (\phi_{i+1} + \phi_{i-1} - 2\phi_i) = e(n_i-n_e)\Delta_x^2
+$$</p>
+</li>
+<li>
+<p>The potential is computed in the cell centres.</p>
+</li>
+<li>
+<p>The continuum is subdivided in cells indexed by $i \in [0, NG-1]$</p>
+</li>
+<li>
+<p>Boundary condition</p>
+<ul>
+<li>Periodic boundary</li>
+<li>Potential is defined as a negative constant
+<ul>
+<li>potential in the last cell is 0</li>
+<li>The number of unknown potentials then is just NG-1.</li>
+</ul>
+</li>
+<li>Resulting matrix : -2 on the diagonal &amp; 1 on the neighbouring diagonal</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Auxiliary vectors</span>
+</span></span><span style="display:flex;"><span>p <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>concatenate([np<span style="color:#f92672">.</span>arange(N), np<span style="color:#f92672">.</span>arange(N)]) <span style="color:#75715e"># Particle indices up to N</span>
+</span></span><span style="display:flex;"><span>Poisson <span style="color:#f92672">=</span> sparse<span style="color:#f92672">.</span>spdiags(([<span style="color:#ae81ff">1</span>, <span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">1</span>] <span style="color:#f92672">*</span> np<span style="color:#f92672">.</span>ones((<span style="color:#ae81ff">1</span>, NG<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>), dtype<span style="color:#f92672">=</span>int)<span style="color:#f92672">.</span>T)<span style="color:#f92672">.</span>T, [<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>], NG<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, NG<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>Poisson <span style="color:#f92672">=</span> Poisson<span style="color:#f92672">.</span>tocsc()
+</span></span></code></pre></div><h3 id="44-main-cycle">4.4 Main Cycle<a hidden class="anchor" aria-hidden="true" href="#44-main-cycle">#</a></h3>
+<ul>
+<li>Four steps for each cycle
+<ol>
+<li>Advance the position</li>
+<li>Compute the density from projected particle to the grid</li>
+<li>Solve Poission equation</li>
+<li>Compute electric field &amp; force</li>
+<li>Advance the particle velocity</li>
+</ol>
+</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">cycle</span>(xp,vp):
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># update particle position xp</span>
+</span></span><span style="display:flex;"><span>    xp <span style="color:#f92672">+=</span> vp <span style="color:#f92672">*</span> DT
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Periodic boundary condition</span>
+</span></span><span style="display:flex;"><span>    xp[np<span style="color:#f92672">.</span>where(xp <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>)] <span style="color:#f92672">+=</span> L
+</span></span><span style="display:flex;"><span>    xp[np<span style="color:#f92672">.</span>where(xp <span style="color:#f92672">&gt;=</span> L)] <span style="color:#f92672">-=</span> L
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Project particles-&gt;grid</span>
+</span></span><span style="display:flex;"><span>    csi <span style="color:#f92672">=</span> xp<span style="color:#f92672">/</span>dx
+</span></span><span style="display:flex;"><span>    g1 <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>floor(csi <span style="color:#f92672">-</span> <span style="color:#ae81ff">0.5</span>) <span style="color:#75715e"># Distance from the centre of the cell</span>
+</span></span><span style="display:flex;"><span>    g <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>concatenate((g1, g1<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>))
+</span></span><span style="display:flex;"><span>    fraz1 <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> np<span style="color:#f92672">.</span>abs(xp<span style="color:#f92672">/</span>dx <span style="color:#f92672">-</span> g1 <span style="color:#f92672">-</span> <span style="color:#ae81ff">0.5</span>)
+</span></span><span style="display:flex;"><span>    fraz <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>concatenate((fraz1, <span style="color:#ae81ff">1</span><span style="color:#f92672">-</span>fraz1))
+</span></span><span style="display:flex;"><span>    g[np<span style="color:#f92672">.</span>where(g <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>)] <span style="color:#f92672">+=</span> NG
+</span></span><span style="display:flex;"><span>    g[np<span style="color:#f92672">.</span>where(g <span style="color:#f92672">&gt;</span> NG<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>)] <span style="color:#f92672">-=</span> NG
+</span></span><span style="display:flex;"><span>    mat <span style="color:#f92672">=</span> sparse<span style="color:#f92672">.</span>csc_matrix((fraz, (p, g)), shape<span style="color:#f92672">=</span>(N, NG))
+</span></span><span style="display:flex;"><span>    rho <span style="color:#f92672">=</span> Q <span style="color:#f92672">/</span> dx <span style="color:#f92672">*</span> mat<span style="color:#f92672">.</span>toarray()<span style="color:#f92672">.</span>sum(axis<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>) <span style="color:#f92672">+</span> rho_back
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Compute electric field potential</span>
+</span></span><span style="display:flex;"><span>    Phi <span style="color:#f92672">=</span> linalg<span style="color:#f92672">.</span>spsolve(Poisson, <span style="color:#f92672">-</span>dx<span style="color:#f92672">**</span><span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> rho[<span style="color:#ae81ff">0</span>:NG<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>])
+</span></span><span style="display:flex;"><span>    Phi <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>concatenate((Phi,[<span style="color:#ae81ff">0</span>]))
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Electric field on the grid</span>
+</span></span><span style="display:flex;"><span>    Eg <span style="color:#f92672">=</span> (np<span style="color:#f92672">.</span>roll(Phi, <span style="color:#ae81ff">1</span>) <span style="color:#f92672">-</span> np<span style="color:#f92672">.</span>roll(Phi, <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>)) <span style="color:#f92672">/</span> (<span style="color:#ae81ff">2</span><span style="color:#f92672">*</span>dx)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># interpolation grid-&gt;particle and velocity update</span>
+</span></span><span style="display:flex;"><span>    vp <span style="color:#f92672">+=</span> mat <span style="color:#f92672">*</span> QM <span style="color:#f92672">*</span> Eg <span style="color:#f92672">*</span> DT
+</span></span></code></pre></div><h3 id="45-diagnostics">4.5 Diagnostics<a hidden class="anchor" aria-hidden="true" href="#45-diagnostics">#</a></h3>
+<ul>
+<li>
+<p>Particle diagnostics</p>
+<ul>
+<li>Phase space plot : $x_p vs. v_p$</li>
+<li>Velocity Distribution function : histogram of particle counts in energy bins</li>
+</ul>
+</li>
+<li>
+<p>Field diagnostics</p>
+<ul>
+<li>Electric filed on the grid vs. time</li>
+<li>FFT modes of the filed quantites</li>
+</ul>
+</li>
+<li>
+<p>Other information</p>
+<ul>
+<li>Total Kinetic Energy : $E_k = \frac{1}{2} \sum_p m_p v_p^2$</li>
+<li>Total Momentum : $P = \sum_p m_p v_p$</li>
+<li>Total Energy of the field : $E_E = \Delta x \sum_c \frac{\varepsilon_0 E^2}{2} \equiv \Delta x \sum_c \frac{\rho \phi}{2}$</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Preparation for phase space plot</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>fig <span style="color:#f92672">=</span> plt<span style="color:#f92672">.</span>figure()
+</span></span><span style="display:flex;"><span>ax <span style="color:#f92672">=</span> plt<span style="color:#f92672">.</span>axes(xlim<span style="color:#f92672">=</span>(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">30</span>), ylim<span style="color:#f92672">=</span>(<span style="color:#f92672">-</span><span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">3</span>))
+</span></span><span style="display:flex;"><span>line, <span style="color:#f92672">=</span> ax<span style="color:#f92672">.</span>plot([], [], lw<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>plt<span style="color:#f92672">.</span>xlabel(<span style="color:#e6db74">&#39;x&#39;</span>)
+</span></span><span style="display:flex;"><span>plt<span style="color:#f92672">.</span>ylabel(<span style="color:#e6db74">&#39;velocity&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>plotlays, plotcols <span style="color:#f92672">=</span> [<span style="color:#ae81ff">2</span>], [<span style="color:#e6db74">&#34;blue&#34;</span>,<span style="color:#e6db74">&#34;red&#34;</span>]
+</span></span><span style="display:flex;"><span>lines <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> index <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">2</span>):
+</span></span><span style="display:flex;"><span>    lobj <span style="color:#f92672">=</span> ax<span style="color:#f92672">.</span>plot([],[],<span style="color:#e6db74">&#39;.&#39;</span>,lw<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>,color<span style="color:#f92672">=</span>plotcols[index])[<span style="color:#ae81ff">0</span>]
+</span></span><span style="display:flex;"><span>    lines<span style="color:#f92672">.</span>append(lobj)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># initialization function: plot the background of each frame</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">init</span>():
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> line <span style="color:#f92672">in</span> lines:
+</span></span><span style="display:flex;"><span>        line<span style="color:#f92672">.</span>set_data([],[])
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> lines
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>adr1<span style="color:#f92672">=</span>np<span style="color:#f92672">.</span>where(vp<span style="color:#f92672">&gt;=</span><span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>adr2<span style="color:#f92672">=</span>np<span style="color:#f92672">.</span>where(vp<span style="color:#f92672">&lt;</span><span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>x1,y1 <span style="color:#f92672">=</span> [],[]
+</span></span><span style="display:flex;"><span>x2,y2 <span style="color:#f92672">=</span> [],[]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">updatefig</span>(<span style="color:#f92672">*</span>args):
+</span></span><span style="display:flex;"><span>    cycle(xp,vp)
+</span></span><span style="display:flex;"><span>    xlist<span style="color:#f92672">=</span>[xp[adr1], xp[adr2]]
+</span></span><span style="display:flex;"><span>    ylist<span style="color:#f92672">=</span>[vp[adr1], vp[adr2]]
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#for index in range(0,1):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> lnum,line <span style="color:#f92672">in</span> enumerate(lines):
+</span></span><span style="display:flex;"><span>        line<span style="color:#f92672">.</span>set_data(xlist[lnum], ylist[lnum]) <span style="color:#75715e"># set data for each line separately. </span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> lines
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>anim <span style="color:#f92672">=</span> FuncAnimation(fig, updatefig, init_func<span style="color:#f92672">=</span>init, frames<span style="color:#f92672">=</span>NT, interval<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>, blit<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)    
+</span></span><span style="display:flex;"><span>HTML(anim<span style="color:#f92672">.</span>to_jshtml())
+</span></span></code></pre></div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://fedaeho.github.io/tags/pic/">PIC</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2022 <a href="https://fedaeho.github.io/">fedaeho</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

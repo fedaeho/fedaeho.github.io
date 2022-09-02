@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>GAN Basic | fedaeho</title>
+<meta name="keywords" content="GAN">
+<meta name="description" content="GAN Definition GANs : Generative Adversarial Networks
+Generative : 생성의 Adversarial : 대립 관계의, 적대적인 Generator(생성자) 와 Discriminator(감별자) 두 개의 네트워크로 구성되어 있음
+일반적인 비유 : 지폐 위조범과 경찰 위조범은 더욱 진짜같은 가짜 위조지폐를 만드려고 한다 : Generator 경찰은 지폐 감별능력을 높여 위조지폐를 잡아야 한다 : Discriminator 최종 : 위조범의 능력이 정점에 달하면, 경찰은 진짜와 위조 지폐를 찍어서 맞추는 수밖에 없다.($D(x)=\frac{1}{2},p=0.5$)
+경찰의 능력이 좋아지면, 위조범은 더 정밀한 위폐를 만들어야한다. -&gt; 위조범의 능력이 좋아지면 경찰도 감별능력을 높여야한다.">
+<meta name="author" content="">
+<link rel="canonical" href="https://fedaeho.github.io/posts/2020-10-26-gan_basic/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.bc1149f4a72aa4858d3a9f71462f75e5884ffe8073ea9d6d5761d5663d651e20.css" integrity="sha256-vBFJ9KcqpIWNOp9xRi915YhP/oBz6p1tV2HVZj1lHiA=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://fedaeho.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://fedaeho.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://fedaeho.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://fedaeho.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://fedaeho.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+          
+          
+          delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+              {left: '\\(', right: '\\)', display: true},
+              {left: '\\[', right: '\\]', display: false}
+          ],
+          
+          throwOnError : false
+        });
+    });
+</script>
+
+
+<meta property="og:title" content="GAN Basic" />
+<meta property="og:description" content="GAN Definition GANs : Generative Adversarial Networks
+Generative : 생성의 Adversarial : 대립 관계의, 적대적인 Generator(생성자) 와 Discriminator(감별자) 두 개의 네트워크로 구성되어 있음
+일반적인 비유 : 지폐 위조범과 경찰 위조범은 더욱 진짜같은 가짜 위조지폐를 만드려고 한다 : Generator 경찰은 지폐 감별능력을 높여 위조지폐를 잡아야 한다 : Discriminator 최종 : 위조범의 능력이 정점에 달하면, 경찰은 진짜와 위조 지폐를 찍어서 맞추는 수밖에 없다.($D(x)=\frac{1}{2},p=0.5$)
+경찰의 능력이 좋아지면, 위조범은 더 정밀한 위폐를 만들어야한다. -&gt; 위조범의 능력이 좋아지면 경찰도 감별능력을 높여야한다." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedaeho.github.io/posts/2020-10-26-gan_basic/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2020-10-26T00:00:00&#43;00:00" />
+<meta property="article:modified_time" content="2020-10-26T00:00:00&#43;00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="GAN Basic"/>
+<meta name="twitter:description" content="GAN Definition GANs : Generative Adversarial Networks
+Generative : 생성의 Adversarial : 대립 관계의, 적대적인 Generator(생성자) 와 Discriminator(감별자) 두 개의 네트워크로 구성되어 있음
+일반적인 비유 : 지폐 위조범과 경찰 위조범은 더욱 진짜같은 가짜 위조지폐를 만드려고 한다 : Generator 경찰은 지폐 감별능력을 높여 위조지폐를 잡아야 한다 : Discriminator 최종 : 위조범의 능력이 정점에 달하면, 경찰은 진짜와 위조 지폐를 찍어서 맞추는 수밖에 없다.($D(x)=\frac{1}{2},p=0.5$)
+경찰의 능력이 좋아지면, 위조범은 더 정밀한 위폐를 만들어야한다. -&gt; 위조범의 능력이 좋아지면 경찰도 감별능력을 높여야한다."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://fedaeho.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "GAN Basic",
+      "item": "https://fedaeho.github.io/posts/2020-10-26-gan_basic/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "GAN Basic",
+  "name": "GAN Basic",
+  "description": "GAN Definition GANs : Generative Adversarial Networks\nGenerative : 생성의 Adversarial : 대립 관계의, 적대적인 Generator(생성자) 와 Discriminator(감별자) 두 개의 네트워크로 구성되어 있음\n일반적인 비유 : 지폐 위조범과 경찰 위조범은 더욱 진짜같은 가짜 위조지폐를 만드려고 한다 : Generator 경찰은 지폐 감별능력을 높여 위조지폐를 잡아야 한다 : Discriminator 최종 : 위조범의 능력이 정점에 달하면, 경찰은 진짜와 위조 지폐를 찍어서 맞추는 수밖에 없다.($D(x)=\\frac{1}{2},p=0.5$)\n경찰의 능력이 좋아지면, 위조범은 더 정밀한 위폐를 만들어야한다. -\u0026gt; 위조범의 능력이 좋아지면 경찰도 감별능력을 높여야한다.",
+  "keywords": [
+    "GAN"
+  ],
+  "articleBody": "GAN Definition GANs : Generative Adversarial Networks\nGenerative : 생성의 Adversarial : 대립 관계의, 적대적인 Generator(생성자) 와 Discriminator(감별자) 두 개의 네트워크로 구성되어 있음\n일반적인 비유 : 지폐 위조범과 경찰 위조범은 더욱 진짜같은 가짜 위조지폐를 만드려고 한다 : Generator 경찰은 지폐 감별능력을 높여 위조지폐를 잡아야 한다 : Discriminator 최종 : 위조범의 능력이 정점에 달하면, 경찰은 진짜와 위조 지폐를 찍어서 맞추는 수밖에 없다.($D(x)=\\frac{1}{2},p=0.5$)\n경찰의 능력이 좋아지면, 위조범은 더 정밀한 위폐를 만들어야한다. -\u003e 위조범의 능력이 좋아지면 경찰도 감별능력을 높여야한다. -\u003e 피드백 실제로는 이렇게 이상적으로 돌아가지 않는다.. mode-collapse : 위조범이 1000원만 기가막히게 만들었고 경찰이 구분을 못한다. -\u003e 계속 1000원만 만들것이다. Equations $x$ : sample from real data\n$z \\sim p_z$ : latent variable ($p_z$ : generally gaussian)\n$G(z) \\sim p_g$\nobjective\nGenerator : $p_g=p_{data}$\nDiscriminator : $D(x)=1, D(G(z))=0$ $$ V(D,G) = \\mathbb{E}{x\\sim p{data}(x)}[\\log{D(x;\\theta_D)}]+ \\mathbb{E}{z\\sim p{z}(z)}[\\log{(1-D(G(z;\\theta_G);\\theta_D)}] $$\nD가 완벽할 때\n$x \\sim p_{data}(x), D(x)=0 \\implies 1st~term=0$ $z \\sim p_{z}(z), D(G(z))=0 \\implies 2nd~term=0$ $\\therefore V(D,G)=0 \\implies \\max_{D} V(D,G)$ D의 목적은 V 값의 최대화 G가 완벽할 때\n1st term 은 z와 관계없으므로 constant $z \\sim p_{z}(z), D(G(z))=1 \\implies 2nd~term=-\\infty$ $\\therefore V(D,G)=-\\infty \\implies \\min_{G} V(D,G)$ G의 목적은 V값의 최소화 re-cap objective : find $G,D$ which satisfy $\\min_{G} \\max_{D} V(D,G)$\n임의의 G에 대한 최적의 D : $D^{*}G(x) = \\frac{p{data}(x)}{p_{data}(x) + p_g(x)}$\n$\\max_D V(D,G) = C(G) = -\\log(4) + 2 \\cdot JSD(p_{data}||p_g)$\nre-cap objective : $\\min_G C(G) : \\min_G JSD(p_{data}||p_g)$\nJSD(Jensen Shannon Divergence) : sum of commuted KL-divergence JSD 측도를 최소화하는 문제와 동일 G는 임의 형태의 pdf -\u003e non-parametric 한 G를 만들기 위해 NN을 사용 -\u003e GANs Pros/Cons GAN : sampler\n최적화시에 $p_g = p_{data}$ 가 되도록하는 $G(z) \\sim p_g$을 만든다. $z$의 mapping function 을 구하는 것이 목적이므로, $x \\sim p_{data}$ 를 직접 구하는 것과는 다르다. : 데이터 분포를 직접 구하는 것이 아니다. 따라서, 데이터 분포 자체를 구하기 위해 tracktable likelihood 를 가정하는 다른 모델과 다르게, likelihood-free 하다. GAN 학습의 어려움\nConvergence D,G 를 동시에 구한다 -\u003e saddle point 를 고려하지 않으면 학습이 영원이 이루어지지 않을 수 있다. mode collapse NN으로 푸는 현실적인 GAN의 경우, 매 단계마다 최적의 $D^{*}$ 를 구할 수 없다. 따라서, value function 을 G와 D에 대해 번갈아가면서 풀어야한다. $G^{*} = \\min_{G} \\max_{D} V(G,D)$ G,D 에 대해 번갈아가며 풀경우, 위 식은 $G^{*} = \\max_{D} \\min_{G} V(G,D)$ 와 다르지 않다. $\\min_{G}$ 를 먼저 푼다. : D가 가장 헷갈려 할만한 샘플 하나만 만들면 땡 -\u003e 쉬운것만 만드는 G가 된다. -\u003e latent variable $z$에 대한 변화가 크지 않은 $G(z)$가 만들어진다. Training $\\max_{D} V(G,D)$ 를 먼저 푼다. 고정된 G를 두고 다음과 같은 데이터를 D에게 제공한다. 생성기 데이터와 라벨 : (G(z), 0.0) 진짜 데이터와 라벨 : (x,1.0) Discriminator 에만 back-prop Loss function : $L_D (\\theta_G, \\theta_D) = -V(G,D) = - \\mathbb{E}{x\\sim p{data}(x)}[\\log{D(x;\\theta_D)}] - \\mathbb{E}{z\\sim p{z}(z)}[\\log{(1-D(G(z;\\theta_G);\\theta_D)}]$ : binary crossentropy 와 동일함 $\\theta_D$ 만 업데이트 고정된 D를 두고 G를 업데이트 한다 Loss function : $L_G (\\theta_G, \\theta_D) = - \\mathbb{E}{z\\sim p{z}(z)}[\\log{(1-D(G(z;\\theta_G);\\theta_D)}]$ 위 식으로 풀면($G=arg\\min_{G}L_G$) G가 처음에 만드는 G(z)는 당연히 이상할 확률이 높으므로, 학습 초기에 값이 잘 변하지 않는다. 따라서, 함수를 $L_G (\\theta_G, \\theta_D) = - \\mathbb{E}{z\\sim p{z}(z)}[\\log{D(G(z;\\theta_G);\\theta_D)}]$ 로 바꾸어, $G=arg\\max_{G}L_G$ 찾는 문제로 변경한다. 이후 $\\theta_G$ 만 업데이트 Example DCGAN(Deep-convolutional GAN) Maxpooling, Upsampling 대신 strides\u003e1 convolution 을 사용하여 feature map 크기를 조정하는 방법을 학습하게 함 Dense 는 z 받을때만 Batch normalization 을 하지만, G 출력과 D 입력에는 사용 Generator에서는 출력에 tanh(MNIST는 sigmoid), 나머지는 ReLU Discriminator에서는 전무 Leaky ReLU, alpha=0.2 ",
+  "wordCount" : "534",
+  "inLanguage": "en",
+  "datePublished": "2020-10-26T00:00:00Z",
+  "dateModified": "2020-10-26T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://fedaeho.github.io/posts/2020-10-26-gan_basic/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "fedaeho",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://fedaeho.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://fedaeho.github.io/" accesskey="h" title="fedaeho (Alt + H)">fedaeho</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://fedaeho.github.io/archives" title="Archive">
+                    <span>Archive</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://fedaeho.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://fedaeho.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      GAN Basic
+    </h1>
+    <div class="post-meta"><span title='2020-10-26 00:00:00 +0000 UTC'>October 26, 2020</span>
+
+</div>
+  </header> 
+  <div class="post-content"><h1 id="gan">GAN<a hidden class="anchor" aria-hidden="true" href="#gan">#</a></h1>
+<h2 id="definition">Definition<a hidden class="anchor" aria-hidden="true" href="#definition">#</a></h2>
+<ul>
+<li>
+<p>GANs : Generative Adversarial Networks</p>
+<ul>
+<li>Generative : 생성의</li>
+<li>Adversarial : 대립 관계의, 적대적인</li>
+</ul>
+</li>
+<li>
+<p>Generator(생성자) 와 Discriminator(감별자) 두 개의 네트워크로 구성되어 있음</p>
+<ul>
+<li><img loading="lazy" src="https://3.bp.blogspot.com/-BgYz6OQc4WU/WchaisOCgOI/AAAAAAAACI0/ONloRtdmVisug_HbkotMbP9tr2hkyfg-ACK4BGAYYCw/s1600/kakao_report2.png" alt=""  />
+</li>
+<li>일반적인 비유 : 지폐 위조범과 경찰
+<ul>
+<li>위조범은 더욱 진짜같은 가짜 위조지폐를 만드려고 한다 : Generator</li>
+<li>경찰은 지폐 감별능력을 높여 위조지폐를 잡아야 한다 : Discriminator</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>최종 : 위조범의 능력이 정점에 달하면, 경찰은 진짜와 위조 지폐를 찍어서 맞추는 수밖에 없다.($D(x)=\frac{1}{2},p=0.5$)</p>
+<ul>
+<li>경찰의 능력이 좋아지면, 위조범은 더 정밀한 위폐를 만들어야한다. -&gt; 위조범의 능력이 좋아지면 경찰도 감별능력을 높여야한다. -&gt; 피드백</li>
+<li>실제로는 이렇게 이상적으로 돌아가지 않는다..
+<ul>
+<li>mode-collapse : 위조범이 1000원만 기가막히게 만들었고 경찰이 구분을 못한다. -&gt; 계속 1000원만 만들것이다.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="equations">Equations<a hidden class="anchor" aria-hidden="true" href="#equations">#</a></h2>
+<ul>
+<li>
+<p>$x$ : sample from real data</p>
+</li>
+<li>
+<p>$z \sim p_z$ : latent variable ($p_z$ : generally gaussian)</p>
+</li>
+<li>
+<p>$G(z) \sim p_g$</p>
+</li>
+<li>
+<p>objective</p>
+<ul>
+<li>
+<p>Generator : $p_g=p_{data}$</p>
+</li>
+<li>
+<p>Discriminator : $D(x)=1, D(G(z))=0$
+$$
+V(D,G) = \mathbb{E}<em>{x\sim p</em>{data}(x)}[\log{D(x;\theta_D)}]+
+\mathbb{E}<em>{z\sim p</em>{z}(z)}[\log{(1-D(G(z;\theta_G);\theta_D)}]
+$$</p>
+</li>
+<li>
+<p>D가 완벽할 때</p>
+<ul>
+<li>$x \sim p_{data}(x), D(x)=0 \implies 1st~term=0$</li>
+<li>$z \sim p_{z}(z), D(G(z))=0 \implies 2nd~term=0$</li>
+<li>$\therefore V(D,G)=0 \implies \max_{D} V(D,G)$</li>
+<li>D의 목적은 V 값의 최대화</li>
+</ul>
+</li>
+<li>
+<p>G가 완벽할 때</p>
+<ul>
+<li>1st term 은 z와 관계없으므로 constant</li>
+<li>$z \sim p_{z}(z), D(G(z))=1 \implies 2nd~term=-\infty$</li>
+<li>$\therefore V(D,G)=-\infty \implies \min_{G} V(D,G)$</li>
+<li>G의 목적은 V값의 최소화</li>
+</ul>
+</li>
+<li>
+<p>re-cap objective : find $G,D$ which satisfy $\min_{G} \max_{D} V(D,G)$</p>
+</li>
+</ul>
+</li>
+<li>
+<p>임의의 G에 대한 최적의 D : $D^{*}<em>G(x) = \frac{p</em>{data}(x)}{p_{data}(x) + p_g(x)}$</p>
+</li>
+<li>
+<p>$\max_D V(D,G) = C(G) = -\log(4) + 2 \cdot JSD(p_{data}||p_g)$</p>
+</li>
+<li>
+<p>re-cap objective : $\min_G C(G) : \min_G JSD(p_{data}||p_g)$</p>
+<ul>
+<li>JSD(Jensen Shannon Divergence) : sum of commuted KL-divergence</li>
+<li>JSD 측도를 최소화하는 문제와 동일</li>
+<li>G는 임의 형태의 pdf -&gt; non-parametric 한 G를 만들기 위해 NN을 사용 -&gt; GANs</li>
+</ul>
+</li>
+</ul>
+<h2 id="proscons">Pros/Cons<a hidden class="anchor" aria-hidden="true" href="#proscons">#</a></h2>
+<ul>
+<li>
+<p>GAN : sampler</p>
+<ul>
+<li>최적화시에 $p_g = p_{data}$ 가 되도록하는 $G(z) \sim p_g$을 만든다.
+<ul>
+<li>$z$의 mapping function 을 구하는 것이 목적이므로, $x \sim p_{data}$ 를 직접 구하는 것과는 다르다. : 데이터 분포를 직접 구하는 것이 아니다.</li>
+<li>따라서, 데이터 분포 자체를 구하기 위해 tracktable likelihood 를 가정하는 다른 모델과 다르게, likelihood-free 하다.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>GAN 학습의 어려움</p>
+<ul>
+<li>Convergence
+<ul>
+<li>D,G 를 동시에 구한다 -&gt; saddle point 를 고려하지 않으면 학습이 영원이 이루어지지 않을 수 있다.</li>
+</ul>
+</li>
+<li>mode collapse
+<ul>
+<li>NN으로 푸는 현실적인 GAN의 경우, 매 단계마다 최적의 $D^{*}$ 를 구할 수 없다. 따라서, value function 을 G와 D에 대해 번갈아가면서 풀어야한다.
+<ul>
+<li>$G^{*} = \min_{G} \max_{D} V(G,D)$</li>
+<li>G,D 에 대해 번갈아가며 풀경우, 위 식은 $G^{*} = \max_{D} \min_{G} V(G,D)$ 와 다르지 않다.
+<ul>
+<li>$\min_{G}$ 를 먼저 푼다. : D가 가장 헷갈려 할만한 샘플 하나만 만들면 땡 -&gt; 쉬운것만 만드는 G가 된다. -&gt; latent variable $z$에 대한 변화가 크지 않은 $G(z)$가 만들어진다.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="training">Training<a hidden class="anchor" aria-hidden="true" href="#training">#</a></h2>
+<ul>
+<li>$\max_{D} V(G,D)$ 를 먼저 푼다.
+<ul>
+<li>고정된 G를 두고 다음과 같은 데이터를 D에게 제공한다.
+<ul>
+<li>생성기 데이터와 라벨 : (G(z), 0.0)</li>
+<li>진짜 데이터와 라벨 : (x,1.0)</li>
+<li>Discriminator 에만 back-prop</li>
+<li>Loss function : $L_D (\theta_G, \theta_D) = -V(G,D) = - \mathbb{E}<em>{x\sim p</em>{data}(x)}[\log{D(x;\theta_D)}] - \mathbb{E}<em>{z\sim p</em>{z}(z)}[\log{(1-D(G(z;\theta_G);\theta_D)}]$ : binary crossentropy 와 동일함</li>
+<li>$\theta_D$ 만 업데이트</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>고정된 D를 두고 G를 업데이트 한다
+<ul>
+<li>Loss function : $L_G (\theta_G, \theta_D) = - \mathbb{E}<em>{z\sim p</em>{z}(z)}[\log{(1-D(G(z;\theta_G);\theta_D)}]$</li>
+<li>위 식으로 풀면($G=arg\min_{G}L_G$) G가 처음에 만드는 G(z)는 당연히 이상할 확률이 높으므로, 학습 초기에 값이 잘 변하지 않는다.</li>
+<li>따라서, 함수를 $L_G (\theta_G, \theta_D) = - \mathbb{E}<em>{z\sim p</em>{z}(z)}[\log{D(G(z;\theta_G);\theta_D)}]$ 로 바꾸어, $G=arg\max_{G}L_G$ 찾는 문제로 변경한다.</li>
+<li>이후 $\theta_G$ 만 업데이트</li>
+</ul>
+</li>
+</ul>
+<h2 id="example">Example<a hidden class="anchor" aria-hidden="true" href="#example">#</a></h2>
+<ul>
+<li>DCGAN(Deep-convolutional GAN)
+<ul>
+<li>Maxpooling, Upsampling 대신 strides&gt;1 convolution 을 사용하여 feature map 크기를 조정하는 방법을 학습하게 함</li>
+<li>Dense 는 z 받을때만</li>
+<li>Batch normalization 을 하지만, G 출력과 D 입력에는 사용</li>
+<li>Generator에서는 출력에 tanh(MNIST는 sigmoid), 나머지는 ReLU</li>
+<li>Discriminator에서는 전무 Leaky ReLU, alpha=0.2</li>
+</ul>
+</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://fedaeho.github.io/tags/gan/">GAN</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2022 <a href="https://fedaeho.github.io/">fedaeho</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

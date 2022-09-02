@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>GAN on fedaeho</title>
+    <link>https://fedaeho.github.io/tags/gan/</link>
+    <description>Recent content in GAN on fedaeho</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ko-KR</language>
+    <lastBuildDate>Mon, 26 Oct 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://fedaeho.github.io/tags/gan/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>GAN Basic</title>
+      <link>https://fedaeho.github.io/posts/2020-10-26-gan_basic/</link>
+      <pubDate>Mon, 26 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/posts/2020-10-26-gan_basic/</guid>
+      <description>GAN Definition GANs : Generative Adversarial Networks
+Generative : 생성의 Adversarial : 대립 관계의, 적대적인 Generator(생성자) 와 Discriminator(감별자) 두 개의 네트워크로 구성되어 있음
+일반적인 비유 : 지폐 위조범과 경찰 위조범은 더욱 진짜같은 가짜 위조지폐를 만드려고 한다 : Generator 경찰은 지폐 감별능력을 높여 위조지폐를 잡아야 한다 : Discriminator 최종 : 위조범의 능력이 정점에 달하면, 경찰은 진짜와 위조 지폐를 찍어서 맞추는 수밖에 없다.($D(x)=\frac{1}{2},p=0.5$)
+경찰의 능력이 좋아지면, 위조범은 더 정밀한 위폐를 만들어야한다. -&amp;gt; 위조범의 능력이 좋아지면 경찰도 감별능력을 높여야한다.</description>
+    </item>
+    
+  </channel>
+</rss>

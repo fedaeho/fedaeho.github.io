@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Posts on fedaeho</title>
+    <link>https://fedaeho.github.io/posts/</link>
+    <description>Recent content in Posts on fedaeho</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ko-KR</language>
+    <lastBuildDate>Tue, 26 Jul 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://fedaeho.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>On-prem k8s 에 Zepplin 설치하기</title>
+      <link>https://fedaeho.github.io/posts/2022-07-26-zepplin-with-k8s/</link>
+      <pubDate>Tue, 26 Jul 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/posts/2022-07-26-zepplin-with-k8s/</guid>
+      <description>Zeppelin on Kubernetes 를 주로 참고하였다.
+Zepplin on k8s 설치 curl -s -O https://raw.githubusercontent.com/apache/zeppelin/master/k8s/zeppelin-server.yaml kubectl apply -f zepplin-server.yaml 이대로 실행하면 apache/zepplin-server:... 이미지를 찾을 수 없다며 ImagePullingBackoff 오류가 발생한다. docker hub 를 확인해보면 apache/zepplin 는 있지만 apache/zepplin-server 가 없는 것을 확인할 수 있다. 따라서 config 에서 해당 이미지를 사용하는 부분을 아래와 같이 교체한다.
+# ZEPPELIN_K8S_CONTAINER_IMAGE: apache/zeppelin-interpreter:0.10.0 ZEPPELIN_K8S_CONTAINER_IMAGE: apache/zeppelin:0.10.0 ... containers: - name: zeppelin-server # image: apache/zeppelin-server:0.10.0 image: apache/zepplin:0.10.0 혹은
+sed -i &amp;#39;s/apache\/zeppelin-interpreter/apache\/zeppelin/g&amp;#39; zeppelin-server.</description>
+    </item>
+    
+    <item>
+      <title>EC2에서 Windows Server Instacne 설정</title>
+      <link>https://fedaeho.github.io/posts/2021-01-09-ec2_guide/</link>
+      <pubDate>Sat, 09 Jan 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/posts/2021-01-09-ec2_guide/</guid>
+      <description>EC2 Windows Server Setting Guide 인스턴스 시작 을 눌러 새 인스턴스 생성 왼쪽 메뉴에서 &amp;ldquo;프리 티어만&amp;rdquo; 체크박스를 선택한 후, Windows 검색. Microsoft Windows Server 2019 Base 선택 Free-tier 사용 위해 t2.micro 선택 인스턴스 목록에서 생성한 인스턴스를 확인할 수 있음. 인스턴스 ID를 클릭하여 세부 내용 확인 인스턴스 요약 메뉴의 우측 상단에 위치한 연결 버튼 클릭 RDP 클라이언트 메뉴를 선택한 후, 원격 데스크톱 파일 다운로드 RDP(Remote Desktop Protocol) 클라이언트를 통해서 서버에 VNC 처럼 리모트 연결이 가능 Windows Remote Desktop 클라이언트는 하기 링크에서 다운로드 가능 Mac OS Windows 암호 가져오기 메뉴를 클릭하고, 기존에 AWS에서 등록하였던 키페어를 업로드하여 암호 보기 다운로드 받은 .</description>
+    </item>
+    
+    <item>
+      <title>GAN Basic</title>
+      <link>https://fedaeho.github.io/posts/2020-10-26-gan_basic/</link>
+      <pubDate>Mon, 26 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/posts/2020-10-26-gan_basic/</guid>
+      <description>GAN Definition GANs : Generative Adversarial Networks
+Generative : 생성의 Adversarial : 대립 관계의, 적대적인 Generator(생성자) 와 Discriminator(감별자) 두 개의 네트워크로 구성되어 있음
+일반적인 비유 : 지폐 위조범과 경찰 위조범은 더욱 진짜같은 가짜 위조지폐를 만드려고 한다 : Generator 경찰은 지폐 감별능력을 높여 위조지폐를 잡아야 한다 : Discriminator 최종 : 위조범의 능력이 정점에 달하면, 경찰은 진짜와 위조 지폐를 찍어서 맞추는 수밖에 없다.($D(x)=\frac{1}{2},p=0.5$)
+경찰의 능력이 좋아지면, 위조범은 더 정밀한 위폐를 만들어야한다. -&amp;gt; 위조범의 능력이 좋아지면 경찰도 감별능력을 높여야한다.</description>
+    </item>
+    
+    <item>
+      <title>Jira, Confluence 에 HTTPS 달기 - Apache Proxy 구성</title>
+      <link>https://fedaeho.github.io/posts/2019-09-15-atlassian-proxy/</link>
+      <pubDate>Sun, 15 Sep 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/posts/2019-09-15-atlassian-proxy/</guid>
+      <description>팀에서 운영하고 있는 Jira, Confluence 가 외부 접속이 가능함에도 불구하고 HTTPS 인증서가 설치되어 있지 않았다. 이외에도 보안상 취약점이 여럿 발견되었기에, Apache Proxy 설정 을 참고하여 설정하였다.
+VirtualHost 구성하기 팀에서 운영하는 Jira/Confluence 는 Atlassian 설정 파일을 외부 접근 가능한 주소로 바꾸고 DNS 업체에 해당 주소에 맞게 도메인만 물리고 포트 번호를 숨기지 않았다. 따라서, 포트번호 없이 기본 주소로 요청이 올 때도 Jira/Confluence 서비스인 것처럼 처리하기 위해 Apache VirtualHost 를 구성해서 리버스 프록시를 만들기로 했다.</description>
+    </item>
+    
+    <item>
+      <title>PIC</title>
+      <link>https://fedaeho.github.io/posts/2018-06-12-pic/</link>
+      <pubDate>Tue, 12 Jun 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/posts/2018-06-12-pic/</guid>
+      <description>Particle-based simulation of plasmas 1. Types of interacting systems 1.1 weakly/stronly interacting system Consider a system
+Collection of charged ptcls. in a box box with the side of the $\lambda_D$ measure E-field at local pt. Strongly coupled system
+If few particles exist,measurement would be very jumpy. As a ptcl passes by the detector, the measurement detects a jump up. When a ptcl moves away it detects a jump down. On avg, at any give time, very few ptcls are near the detector.</description>
+    </item>
+    
+    <item>
+      <title>Virtualenvwrapper 로 python virtualenv 설정하기</title>
+      <link>https://fedaeho.github.io/posts/2018-08-17-python-env-guide/</link>
+      <pubDate>Tue, 12 Jun 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/posts/2018-08-17-python-env-guide/</guid>
+      <description>Virtualenv Python은 한 라이브러리 묶음에 한가지 버전만 사용 가능하다. 따라서 어떤 프로그램이 특정한 라이브러리와 특정한 Python 버전을 필요로 한다면(이를 denpendency, 한국어로 의존성이라고 한다), 파이썬을 따로 설치하는 방법 밖에 없다.
+sudo 가 아닌 일반 유저가 서버에서 Python을 사용하는 경우, 일반적으로는 서버에 설치되어 있는 Python 버전만이 사용가능하다. 2018년 기준으로 대부분 서버에서 기본으로 설정되어있는 Python 버전은 2.7 과 3.6 이다.
+이러한 Python 버전과 패키지를 각각의 유저가 원하는 환경에 맞추어 관리하기 위해서는 주로 다음과 같은 방법이 사용된다.</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>EC2에서 Windows Server Instacne 설정 | fedaeho</title>
+<meta name="keywords" content="EC2, WindowsServer">
+<meta name="description" content="EC2 Windows Server Setting Guide 인스턴스 시작 을 눌러 새 인스턴스 생성 왼쪽 메뉴에서 &ldquo;프리 티어만&rdquo; 체크박스를 선택한 후, Windows 검색. Microsoft Windows Server 2019 Base 선택 Free-tier 사용 위해 t2.micro 선택 인스턴스 목록에서 생성한 인스턴스를 확인할 수 있음. 인스턴스 ID를 클릭하여 세부 내용 확인 인스턴스 요약 메뉴의 우측 상단에 위치한 연결 버튼 클릭 RDP 클라이언트 메뉴를 선택한 후, 원격 데스크톱 파일 다운로드 RDP(Remote Desktop Protocol) 클라이언트를 통해서 서버에 VNC 처럼 리모트 연결이 가능 Windows Remote Desktop 클라이언트는 하기 링크에서 다운로드 가능 Mac OS Windows 암호 가져오기 메뉴를 클릭하고, 기존에 AWS에서 등록하였던 키페어를 업로드하여 암호 보기 다운로드 받은 .">
+<meta name="author" content="">
+<link rel="canonical" href="https://fedaeho.github.io/posts/2021-01-09-ec2_guide/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.bc1149f4a72aa4858d3a9f71462f75e5884ffe8073ea9d6d5761d5663d651e20.css" integrity="sha256-vBFJ9KcqpIWNOp9xRi915YhP/oBz6p1tV2HVZj1lHiA=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://fedaeho.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://fedaeho.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://fedaeho.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://fedaeho.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://fedaeho.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.css" integrity="sha384-bYdxxUwYipFNohQlHt0bjN/LCpueqWz13HufFEV1SUatKs1cm4L6fFgCi1jT643X" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/katex.min.js" integrity="sha384-Qsn9KnoKISj6dI8g7p1HBlNpVx0I8p1SvlwOldgi3IorMle61nQy4zEahWYtljaz" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.2/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+          
+          
+          delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+              {left: '\\(', right: '\\)', display: true},
+              {left: '\\[', right: '\\]', display: false}
+          ],
+          
+          throwOnError : false
+        });
+    });
+</script>
+
+
+<meta property="og:title" content="EC2에서 Windows Server Instacne 설정" />
+<meta property="og:description" content="EC2 Windows Server Setting Guide 인스턴스 시작 을 눌러 새 인스턴스 생성 왼쪽 메뉴에서 &ldquo;프리 티어만&rdquo; 체크박스를 선택한 후, Windows 검색. Microsoft Windows Server 2019 Base 선택 Free-tier 사용 위해 t2.micro 선택 인스턴스 목록에서 생성한 인스턴스를 확인할 수 있음. 인스턴스 ID를 클릭하여 세부 내용 확인 인스턴스 요약 메뉴의 우측 상단에 위치한 연결 버튼 클릭 RDP 클라이언트 메뉴를 선택한 후, 원격 데스크톱 파일 다운로드 RDP(Remote Desktop Protocol) 클라이언트를 통해서 서버에 VNC 처럼 리모트 연결이 가능 Windows Remote Desktop 클라이언트는 하기 링크에서 다운로드 가능 Mac OS Windows 암호 가져오기 메뉴를 클릭하고, 기존에 AWS에서 등록하였던 키페어를 업로드하여 암호 보기 다운로드 받은 ." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://fedaeho.github.io/posts/2021-01-09-ec2_guide/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-01-09T00:00:00&#43;00:00" />
+<meta property="article:modified_time" content="2021-01-09T00:00:00&#43;00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="EC2에서 Windows Server Instacne 설정"/>
+<meta name="twitter:description" content="EC2 Windows Server Setting Guide 인스턴스 시작 을 눌러 새 인스턴스 생성 왼쪽 메뉴에서 &ldquo;프리 티어만&rdquo; 체크박스를 선택한 후, Windows 검색. Microsoft Windows Server 2019 Base 선택 Free-tier 사용 위해 t2.micro 선택 인스턴스 목록에서 생성한 인스턴스를 확인할 수 있음. 인스턴스 ID를 클릭하여 세부 내용 확인 인스턴스 요약 메뉴의 우측 상단에 위치한 연결 버튼 클릭 RDP 클라이언트 메뉴를 선택한 후, 원격 데스크톱 파일 다운로드 RDP(Remote Desktop Protocol) 클라이언트를 통해서 서버에 VNC 처럼 리모트 연결이 가능 Windows Remote Desktop 클라이언트는 하기 링크에서 다운로드 가능 Mac OS Windows 암호 가져오기 메뉴를 클릭하고, 기존에 AWS에서 등록하였던 키페어를 업로드하여 암호 보기 다운로드 받은 ."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://fedaeho.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "EC2에서 Windows Server Instacne 설정",
+      "item": "https://fedaeho.github.io/posts/2021-01-09-ec2_guide/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "EC2에서 Windows Server Instacne 설정",
+  "name": "EC2에서 Windows Server Instacne 설정",
+  "description": "EC2 Windows Server Setting Guide 인스턴스 시작 을 눌러 새 인스턴스 생성 왼쪽 메뉴에서 \u0026ldquo;프리 티어만\u0026rdquo; 체크박스를 선택한 후, Windows 검색. Microsoft Windows Server 2019 Base 선택 Free-tier 사용 위해 t2.micro 선택 인스턴스 목록에서 생성한 인스턴스를 확인할 수 있음. 인스턴스 ID를 클릭하여 세부 내용 확인 인스턴스 요약 메뉴의 우측 상단에 위치한 연결 버튼 클릭 RDP 클라이언트 메뉴를 선택한 후, 원격 데스크톱 파일 다운로드 RDP(Remote Desktop Protocol) 클라이언트를 통해서 서버에 VNC 처럼 리모트 연결이 가능 Windows Remote Desktop 클라이언트는 하기 링크에서 다운로드 가능 Mac OS Windows 암호 가져오기 메뉴를 클릭하고, 기존에 AWS에서 등록하였던 키페어를 업로드하여 암호 보기 다운로드 받은 .",
+  "keywords": [
+    "EC2", "WindowsServer"
+  ],
+  "articleBody": "EC2 Windows Server Setting Guide 인스턴스 시작 을 눌러 새 인스턴스 생성 왼쪽 메뉴에서 “프리 티어만” 체크박스를 선택한 후, Windows 검색. Microsoft Windows Server 2019 Base 선택 Free-tier 사용 위해 t2.micro 선택 인스턴스 목록에서 생성한 인스턴스를 확인할 수 있음. 인스턴스 ID를 클릭하여 세부 내용 확인 인스턴스 요약 메뉴의 우측 상단에 위치한 연결 버튼 클릭 RDP 클라이언트 메뉴를 선택한 후, 원격 데스크톱 파일 다운로드 RDP(Remote Desktop Protocol) 클라이언트를 통해서 서버에 VNC 처럼 리모트 연결이 가능 Windows Remote Desktop 클라이언트는 하기 링크에서 다운로드 가능 Mac OS Windows 암호 가져오기 메뉴를 클릭하고, 기존에 AWS에서 등록하였던 키페어를 업로드하여 암호 보기 다운로드 받은 .rdp 파일을 실행한 후 해당 암호 입력 Ul;pie=Er?eB8BfrZ\u0026Y4Q$xPtTLnnKXJ 제어판 \u003e 국가 또는 지역 \u003e 관리자 옵션 에서 “유니코드를 지원하지 않는 프로그램용 언어\"를 한국어(대한민국)으로 설정 Multiple Remote Desktop Sessions For The Same User Jun 25, 2013 by Beaulin Twinkle\nBy default Windows Server 2008 and Windows Server 2012 are set to allow only a single session for a user through remote desktop. But sometimes you may need to allow multiple remote desktop sessions for A single user at the same time. For allowing concurrent same user sessions you need to change the terminal server settings in the registry on the server. Below is the step by step instruction to fix the problem. Follow the below steps to do the registry change. Steps To Allow Multiple Remote Desktop Sessions Per User: On the Windows Server 2008 go to Start –\u003e Run (In Windows Server 2012 go to search, type in run and click Run Desktop app) and type in regedit and press enter button to launch the Registry Editor. In the Registry Editor go to HKEY_LOCAL_MACHINE\\ System\\ CurrentControlSet\\ Control\\ TerminalServer. On selecting the TerminalServices Registry, you can see the registry key fSingleSessionPerUser on the right panel. If the key is not available then create a new key by right clicking TerminalServices and slecting New –\u003e DWORD. Double click or right-click –\u003e modify the key fSingleSessionPerUser. Change the value from 1 to 0. The value 1 means single session for each user and 0 means multiple sessions for each user. Click OK for the new settings to take effort. https://github.com/stascorp/rdpwrap\nEnable Multiple RDP Sessions Log into the server, where the Remote Desktop Services are installed. Open the start screen (press the Windows key) and type gpedit.msc and open it. Go to Computer Configuration \u003e Administrative Templates \u003e Windows Components \u003e Remote Desktop Services \u003e Remote Desktop Session Host \u003e Connections. Set Restrict Remote Desktop Services user to a single Remote Desktop Services session to Disabled. Double click Limit number of connections and set the RD Maximum Connections allowed to 999999. You could either do it with Group Policy: Computer Configuration\\Administrative Templates\\Windows Components\\Remote Desktop Services\\ Remote Desktop Session Host\\Connections\\\nRestrict Remote Desktop Services users to a single Remote Desktop Services session value: Disabled Next, double-click on Limit number of connections and then set the RD Maximum Connections allowed to 999999. Or you could edit the registry as follows:\nHKLM\\SYSTEM\\CurrentControlSet\\Control\\Terminal Server\nfSingleSessionPerUser value: 0 fdenyTSConnections value: 0 https://blog.boxcorea.com/wp/archives/2380\n[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 Invoke-WebRequest -Uri \"https://www.python.org/ftp/python/3.7.6/python-3.7.6.exe\" -OutFile \"c:/temp/python-3.7.6.exe\" mkdir c:/temp/python-3.7.6.exe InstallAllUsers=1 PrependPath=1 Include_test=0 ",
+  "wordCount" : "514",
+  "inLanguage": "en",
+  "datePublished": "2021-01-09T00:00:00Z",
+  "dateModified": "2021-01-09T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://fedaeho.github.io/posts/2021-01-09-ec2_guide/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "fedaeho",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://fedaeho.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://fedaeho.github.io/" accesskey="h" title="fedaeho (Alt + H)">fedaeho</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://fedaeho.github.io/archives" title="Archive">
+                    <span>Archive</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://fedaeho.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://fedaeho.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      EC2에서 Windows Server Instacne 설정
+    </h1>
+    <div class="post-meta"><span title='2021-01-09 00:00:00 +0000 UTC'>January 9, 2021</span>
+
+</div>
+  </header> 
+  <div class="post-content"><h1 id="ec2-windows-server-setting-guide">EC2 Windows Server Setting Guide<a hidden class="anchor" aria-hidden="true" href="#ec2-windows-server-setting-guide">#</a></h1>
+<ul>
+<li><code>인스턴스 시작</code> 을 눌러 새 인스턴스 생성</li>
+</ul>
+<p><img loading="lazy" src="https://tva1.sinaimg.cn/large/008eGmZEgy1gmvilo40u2j31ag0bumye.jpg" alt="Screen Shot 2021-01-09 at 1.43.45 PM"  />
+</p>
+<ul>
+<li>왼쪽 메뉴에서 &ldquo;프리 티어만&rdquo; 체크박스를 선택한 후, <code>Windows</code> 검색.
+<ul>
+<li>Microsoft Windows Server 2019 Base 선택</li>
+</ul>
+</li>
+</ul>
+<p><img loading="lazy" src="https://tva1.sinaimg.cn/large/008eGmZEgy1gmviiwva80j327i0kk45d.jpg" alt="Screen Shot 2021-01-09 at 1.43.45 PM"  />
+</p>
+<ul>
+<li>Free-tier 사용 위해 <code>t2.micro</code> 선택</li>
+</ul>
+<p><img loading="lazy" src="https://tva1.sinaimg.cn/large/008eGmZEgy1gmviiuj5xoj31s80u0ak7.jpg" alt="Screen Shot 2021-01-09 at 1.44.24 PM"  />
+</p>
+<ul>
+<li>인스턴스 목록에서 생성한 인스턴스를 확인할 수 있음. 인스턴스 ID를 클릭하여 세부 내용 확인</li>
+</ul>
+<p><img loading="lazy" src="https://tva1.sinaimg.cn/large/008eGmZEgy1gmviiteub5j327w0dq0wb.jpg" alt="Screen Shot 2021-01-09 at 1.44.47 PM"  />
+</p>
+<ul>
+<li>인스턴스 요약 메뉴의 우측 상단에 위치한 <code> 연결</code> 버튼 클릭</li>
+</ul>
+<p><img loading="lazy" src="https://tva1.sinaimg.cn/large/008eGmZEgy1gmvil3hsxjj327a0rijzj.jpg" alt="Screen Shot 2021-01-09 at 1.45.08 PM"  />
+</p>
+<ul>
+<li>RDP 클라이언트 메뉴를 선택한 후, 원격 데스크톱 파일 다운로드
+<ul>
+<li>RDP(Remote Desktop Protocol) 클라이언트를 통해서 서버에 VNC 처럼 리모트 연결이 가능</li>
+<li>Windows Remote Desktop 클라이언트는 하기 링크에서 다운로드 가능
+<ul>
+<li><a href="https://apps.apple.com/app/microsoft-remote-desktop/id1295203466?mt=12">Mac OS</a></li>
+<li><a href="https://www.microsoft.com/ko-kr/p/microsoft-remote-desktop/9wzdncrfj3ps?rtc=1&amp;activetab=pivot:overviewtab">Windows</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><img loading="lazy" src="https://tva1.sinaimg.cn/large/008eGmZEgy1gmviisbsnjj312y0u0jwf.jpg" alt="Screen Shot 2021-01-09 at 1.45.18 PM"  />
+</p>
+<ul>
+<li>암호 가져오기 메뉴를 클릭하고, 기존에 AWS에서 등록하였던 키페어를 업로드하여 암호 보기
+<ul>
+<li>다운로드 받은 <code>.rdp</code> 파일을 실행한 후 해당 암호 입력</li>
+<li>Ul;pie=Er?eB8BfrZ&amp;Y4Q$xPtTLnnKXJ</li>
+</ul>
+</li>
+</ul>
+<p><img loading="lazy" src="https://tva1.sinaimg.cn/large/008eGmZEgy1gmviimrihtj312p0u00wg.jpg" alt="Screen Shot 2021-01-09 at 1.45.26 PM"  />
+</p>
+<ul>
+<li>제어판 &gt; 국가 또는 지역 &gt; 관리자 옵션 에서 &ldquo;유니코드를 지원하지 않는 프로그램용 언어&quot;를 한국어(대한민국)으로 설정</li>
+</ul>
+<h1 id="multiple-remote-desktop-sessions-for-the-same-user">Multiple Remote Desktop Sessions For The Same User<a hidden class="anchor" aria-hidden="true" href="#multiple-remote-desktop-sessions-for-the-same-user">#</a></h1>
+<p><a href="https://www.mytecbits.com/microsoft/windows/multiple-remote-desktop-sessions-for-a-single-user">Jun 25, 2013</a> by <a href="https://www.mytecbits.com/author/beaulintwinkle">Beaulin Twinkle</a></p>
+<ul>
+<li>By default Windows Server 2008 and Windows Server 2012 are set to allow only a single session for a user through remote desktop. But sometimes you may need to allow multiple remote desktop sessions for A single user at the same time. For allowing concurrent same user sessions you need to change the terminal server settings in the registry on the server.</li>
+<li>Below is the step by step instruction to fix the problem. Follow the below steps to do the registry change.</li>
+</ul>
+<h2 id="steps-to-allow-multiple-remote-desktop-sessions-per-user">Steps To Allow Multiple Remote Desktop Sessions Per User:<a hidden class="anchor" aria-hidden="true" href="#steps-to-allow-multiple-remote-desktop-sessions-per-user">#</a></h2>
+<ol>
+<li>On the Windows Server 2008 go to <strong>Start</strong> –&gt; <strong>Run</strong> (In Windows Server 2012 go to search, type in <strong>run</strong> and click <strong>Run Desktop app</strong>) and type in <strong>regedit</strong> and press enter button to launch the <strong>Registry Editor</strong>.
+<img loading="lazy" src="https://www.mytecbits.com/wp-content/uploads/Windows-Server-2008-RDP-Multiple-Sessions-Per-User-1.jpg" alt="Windows-Server-2008-RDP-Multiple-Sessions-Per-User-1"  />
+</li>
+<li>In the Registry Editor go to <strong>HKEY_LOCAL_MACHINE\ System\ CurrentControlSet\ Control\ TerminalServer</strong>.</li>
+<li>On selecting the <strong>TerminalServices</strong> Registry, you can see the registry key <strong>fSingleSessionPerUser</strong> on the right panel. If the key is not available then create a new key by right clicking <strong>TerminalServices</strong> and slecting <strong>New</strong> –&gt; <strong>DWORD.</strong></li>
+<li><strong>Double click</strong> or <strong>right-click –&gt; modify</strong> the key <strong>fSingleSessionPerUser.</strong> Change the value from <strong>1 to 0</strong>. The value 1 means single session for each user and 0 means multiple sessions for each user.
+<img loading="lazy" src="https://www.mytecbits.com/wp-content/uploads/Windows-Server-2008-RDP-Multiple-Sessions-Per-User-2.jpg" alt="Windows-Server-2008-RDP-Multiple-Sessions-Per-User-2"  />
+</li>
+<li>Click OK for the new settings to take effort.</li>
+</ol>
+<p><a href="https://github.com/stascorp/rdpwrap">https://github.com/stascorp/rdpwrap</a></p>
+<h3 id="enable-multiple-rdp-sessions">Enable Multiple RDP Sessions<a hidden class="anchor" aria-hidden="true" href="#enable-multiple-rdp-sessions">#</a></h3>
+<ol>
+<li>Log into the server, where the Remote Desktop Services are installed.</li>
+<li>Open the start screen (press the Windows key) and type gpedit.msc and open it.</li>
+<li>Go to Computer Configuration &gt; Administrative Templates &gt; Windows Components &gt; Remote Desktop Services &gt; Remote Desktop Session Host &gt; Connections.</li>
+<li>Set Restrict Remote Desktop Services user to a single Remote Desktop Services session to Disabled.</li>
+<li>Double click Limit number of connections and set the RD Maximum Connections allowed to 999999.</li>
+</ol>
+<p>You could either do it with Group Policy:
+<code>Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\ Remote Desktop Session Host\Connections\</code></p>
+<ul>
+<li>Restrict Remote Desktop Services users to a single Remote Desktop Services session   <strong>value: Disabled</strong></li>
+<li>Next, double-click on <strong>Limit number of connections</strong> and then set the RD Maximum Connections allowed to 999999.</li>
+</ul>
+<p>Or you could edit the registry as follows:</p>
+<p><code>HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server</code></p>
+<ul>
+<li><strong>fSingleSessionPerUser   value: 0</strong></li>
+<li><strong>fdenyTSConnections value: 0</strong></li>
+</ul>
+<p><a href="https://blog.boxcorea.com/wp/archives/2380">https://blog.boxcorea.com/wp/archives/2380</a></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-powershell" data-lang="powershell"><span style="display:flex;"><span><span style="color:#66d9ef">[Net.ServicePointManager]</span>::SecurityProtocol = <span style="color:#66d9ef">[Net.SecurityProtocolType]</span>::Tls12
+</span></span><span style="display:flex;"><span>Invoke-WebRequest -Uri <span style="color:#e6db74">&#34;https://www.python.org/ftp/python/3.7.6/python-3.7.6.exe&#34;</span> -OutFile <span style="color:#e6db74">&#34;c:/temp/python-3.7.6.exe&#34;</span>
+</span></span><span style="display:flex;"><span>mkdir 
+</span></span><span style="display:flex;"><span>c:/temp/python-3.7.6.exe InstallAllUsers=1 PrependPath=1 Include_test=0
+</span></span></code></pre></div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://fedaeho.github.io/tags/ec2/">EC2</a></li>
+      <li><a href="https://fedaeho.github.io/tags/windowsserver/">WindowsServer</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2022 <a href="https://fedaeho.github.io/">fedaeho</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

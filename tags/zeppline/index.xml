@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Zeppline on fedaeho</title>
+    <link>https://fedaeho.github.io/tags/zeppline/</link>
+    <description>Recent content in Zeppline on fedaeho</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ko-KR</language>
+    <lastBuildDate>Tue, 26 Jul 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://fedaeho.github.io/tags/zeppline/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>On-prem k8s 에 Zepplin 설치하기</title>
+      <link>https://fedaeho.github.io/posts/2022-07-26-zepplin-with-k8s/</link>
+      <pubDate>Tue, 26 Jul 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://fedaeho.github.io/posts/2022-07-26-zepplin-with-k8s/</guid>
+      <description>Zeppelin on Kubernetes 를 주로 참고하였다.
+Zepplin on k8s 설치 curl -s -O https://raw.githubusercontent.com/apache/zeppelin/master/k8s/zeppelin-server.yaml kubectl apply -f zepplin-server.yaml 이대로 실행하면 apache/zepplin-server:... 이미지를 찾을 수 없다며 ImagePullingBackoff 오류가 발생한다. docker hub 를 확인해보면 apache/zepplin 는 있지만 apache/zepplin-server 가 없는 것을 확인할 수 있다. 따라서 config 에서 해당 이미지를 사용하는 부분을 아래와 같이 교체한다.
+# ZEPPELIN_K8S_CONTAINER_IMAGE: apache/zeppelin-interpreter:0.10.0 ZEPPELIN_K8S_CONTAINER_IMAGE: apache/zeppelin:0.10.0 ... containers: - name: zeppelin-server # image: apache/zeppelin-server:0.10.0 image: apache/zepplin:0.10.0 혹은
+sed -i &amp;#39;s/apache\/zeppelin-interpreter/apache\/zeppelin/g&amp;#39; zeppelin-server.</description>
+    </item>
+    
+  </channel>
+</rss>
